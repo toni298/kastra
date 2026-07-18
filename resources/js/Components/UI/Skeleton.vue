@@ -8,7 +8,7 @@ import { computed } from 'vue'
 const props = defineProps({
   width: { type: String, default: 'full' },
   height: { type: String, default: '4' },
-  rounded: { type: Boolean, default: true }
+  rounded: { type: Boolean, default: true },
 })
 
 const sizeClasses = computed(() => {

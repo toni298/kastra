@@ -1,10 +1,12 @@
 import '../css/app.css'
-import { createApp, h } from 'vue'
-import { createInertiaApp } from '@inertiajs/vue3'
-import { createPinia } from 'pinia'
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
+import './bootstrap'
 
-const appName = import.meta.env.VITE_APP_NAME || 'Kastra ERP'
+import { createInertiaApp } from '@inertiajs/vue3'
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
+import { createApp, h } from 'vue'
+import { ZiggyVue } from '../../vendor/tightenco/ziggy'
+
+const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
 
 createInertiaApp({
   title: (title) => `${title} - ${appName}`,
@@ -13,11 +15,10 @@ createInertiaApp({
   setup({ el, App, props, plugin }) {
     return createApp({ render: () => h(App, props) })
       .use(plugin)
-      .use(createPinia())
+      .use(ZiggyVue)
       .mount(el)
   },
   progress: {
-    color: '#22c55e',
-    showSpinner: true,
+    color: '#4B5563',
   },
 })

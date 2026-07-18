@@ -8,6 +8,6 @@
 import Icon from './Icon.vue'
 
 defineProps({
-  size: { type: Number, default: 32 }
+  size: { type: Number, default: 32 },
 })
 </script>

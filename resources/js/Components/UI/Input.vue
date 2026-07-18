@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="w-full">
     <label v-if="label" :for="id" class="block text-sm font-medium text-secondary-700 mb-1">
       {{ label }}
@@ -15,9 +15,9 @@
         'w-full px-3 py-2 border rounded-lg transition duration-150',
         'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500',
         error ? 'border-red-500' : 'border-secondary-300',
-        disabled ? 'bg-secondary-100 cursor-not-allowed' : 'bg-white'
+        disabled ? 'bg-secondary-100 cursor-not-allowed' : 'bg-white',
       ]"
-      @input="('update:modelValue', .target.value)"
+      @input="$emit('update:modelValue', $event.target.value)"
     />
     <p v-if="error" class="mt-1 text-sm text-red-500">{{ error }}</p>
   </div>
@@ -32,7 +32,7 @@ defineProps({
   placeholder: { type: String, default: '' },
   error: { type: String, default: '' },
   disabled: { type: Boolean, default: false },
-  required: { type: Boolean, default: false }
+  required: { type: Boolean, default: false },
 })
 
 defineEmits(['update:modelValue'])

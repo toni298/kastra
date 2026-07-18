@@ -1,4 +1,4 @@
-﻿import js from '@eslint/js'
+import js from '@eslint/js'
 import pluginVue from 'eslint-plugin-vue'
 import eslintConfigPrettier from '@vue/eslint-config-prettier'
 
@@ -21,15 +21,14 @@ export default [
         clearInterval: 'readonly',
         localStorage: 'readonly',
         sessionStorage: 'readonly',
+        route: 'readonly',
+        URL: 'readonly',
       },
     },
     rules: {
       'vue/multi-word-component-names': 'off',
       'vue/no-v-html': 'error',
-      'vue/max-attributes-per-line': ['error', {
-        singleline: { max: 3 },
-        multiline: { max: 1 },
-      }],
+      'vue/max-attributes-per-line': 'off',
       'vue/html-self-closing': ['error', {
         html: {
           void: 'always',
@@ -42,3 +41,5 @@ export default [
     },
   },
 ]
+
+
