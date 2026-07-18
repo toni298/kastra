@@ -2,15 +2,37 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "dev": "vite",
         "build": "vite build",
-        "dev": "vite"
+        "lint": "eslint resources/js --ext .vue,.js --report-unused-disable-directives",
+        "format": "prettier --write \"resources/js/**/*.{vue,js}\"",
+        "lint:fix": "eslint resources/js --ext .vue,.js --fix"
     },
     "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@tailwindcss/forms": "^0.5.11",
+        "@tailwindcss/postcss": "^4.3.3",
+        "@tailwindcss/typography": "^0.5.20",
         "@tailwindcss/vite": "^4.0.0",
+        "@vue/eslint-config-prettier": "^10.2.0",
+        "autoprefixer": "^10.5.4",
         "axios": "^1.7.4",
         "concurrently": "^9.0.1",
+        "eslint": "^10.7.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-vue": "^10.9.2",
         "laravel-vite-plugin": "^1.2.0",
-        "tailwindcss": "^4.0.0",
+        "postcss": "^8.5.19",
+        "prettier": "^3.9.5",
+        "tailwindcss": "^4.3.3",
         "vite": "^6.0.11"
+    },
+    "dependencies": {
+        "@inertiajs/vue3": "^3.6.1",
+        "@lucide/vue": "^1.25.0",
+        "@vitejs/plugin-vue": "^6.0.8",
+        "lucide-vue-next": "^1.0.0",
+        "pinia": "^4.0.2",
+        "vue": "^3.5.40"
     }
 }
