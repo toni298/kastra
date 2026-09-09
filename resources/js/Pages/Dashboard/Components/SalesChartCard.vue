@@ -12,7 +12,7 @@ import {
   Tooltip,
 } from 'chart.js'
 import { Line } from 'vue-chartjs'
-import { useRoute } from '../../../../../vendor/tightenco/ziggy/src/js'
+import { useRoute } from 'ziggy-js'
 
 ChartJS.register(CategoryScale, Filler, Legend, LinearScale, LineElement, PointElement, Tooltip)
 

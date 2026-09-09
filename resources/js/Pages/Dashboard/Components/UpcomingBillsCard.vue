@@ -1,7 +1,7 @@
 <script setup>
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { ArrowDownLeft, ArrowUpRight, CalendarCheck2, Check, ArrowRight } from 'lucide-vue-next'
-import { useRoute } from '../../../../../vendor/tightenco/ziggy/src/js'
+import { useRoute } from 'ziggy-js'
 
 defineProps({
   reminders: { type: Array, default: () => [] },

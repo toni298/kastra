@@ -1,11 +1,9 @@
 <script setup>
-import { ref } from 'vue'
-import { Download, FilePlus2, LockKeyhole } from 'lucide-vue-next'
-import Button from '@/Components/UI/Button.vue'
 import AccountingLayout from '@/Layouts/AccountingLayout.vue'
-import ManualJournalModal from '@/Pages/AccountingDashboard/Components/ManualJournalModal.vue'
-import ClosePeriodDialog from '@/Pages/AccountingDashboard/Components/ClosePeriodDialog.vue'
 import AccountingOverviewContent from '@/Pages/AccountingDashboard/Components/AccountingOverview.vue'
+import ClosePeriodDialog from '@/Pages/AccountingDashboard/Components/ClosePeriodDialog.vue'
+import ManualJournalModal from '@/Pages/AccountingDashboard/Components/ManualJournalModal.vue'
+import { ref } from 'vue'
 
 defineProps({
   overview: { type: Object, default: () => ({}) },

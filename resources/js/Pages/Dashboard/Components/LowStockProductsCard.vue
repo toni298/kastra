@@ -1,7 +1,7 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3'
 import { Package } from 'lucide-vue-next'
-import { useRoute } from '../../../../../vendor/tightenco/ziggy/src/js'
+import { useRoute } from 'ziggy-js'
 
 defineProps({
   products: { type: Array, required: true },

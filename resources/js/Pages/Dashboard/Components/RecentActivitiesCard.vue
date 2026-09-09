@@ -1,7 +1,7 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3'
 import { FileText, ShoppingCart, ArrowRight } from 'lucide-vue-next'
-import { useRoute } from '../../../../../vendor/tightenco/ziggy/src/js'
+import { useRoute } from 'ziggy-js'
 
 defineProps({
   activities: { type: Array, required: true },

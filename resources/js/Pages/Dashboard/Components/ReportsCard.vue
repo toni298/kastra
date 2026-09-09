@@ -8,7 +8,7 @@ import {
   Landmark,
   ChevronRight,
 } from 'lucide-vue-next'
-import { useRoute } from '../../../../../vendor/tightenco/ziggy/src/js'
+import { useRoute } from 'ziggy-js'
 
 const page = usePage()
 const route = useRoute(page.props.ziggy)

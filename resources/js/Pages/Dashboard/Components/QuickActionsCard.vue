@@ -1,7 +1,7 @@
 <script setup>
 import { Link, usePage } from '@inertiajs/vue3'
 import { ShoppingCart, Package, Plus, Receipt, ArrowRightLeft, BarChart3 } from '@lucide/vue'
-import { useRoute } from '../../../../../vendor/tightenco/ziggy/src/js'
+import { useRoute } from 'ziggy-js'
 
 const page = usePage()
 const route = useRoute(page.props.ziggy)
