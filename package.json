@@ -1,6 +1,9 @@
 {
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "concurrently -k vite npm:dev:ssr --names=vite,ssr",
     "dev:ssr": "node scripts/dev-ssr.js",
