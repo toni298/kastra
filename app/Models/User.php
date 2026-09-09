@@ -3,7 +3,9 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Concerns\UsesUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -11,7 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable, UsesUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -19,9 +21,12 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'company_id',
+        'branch_id',
         'name',
         'email',
         'password',
+        'onboarding_completed_at',
     ];
 
     /**
@@ -35,6 +40,35 @@ class User extends Authenticatable
     ];
 
     /**
+     * Kasir murni: punya akses kasir tapi BUKAN owner.
+     * Owner selalu diarahkan ke dashboard utama.
+     */
+    public function isCashierOnly(): bool
+    {
+        if ($this->hasRole('owner')) {
+            return false;
+        }
+
+        return $this->can('cashier.access');
+    }
+
+    /**
+     * Route tujuan setelah login / akses halaman root.
+     */
+    public function homeRoute(): string
+    {
+        if ($this->onboarding_completed_at === null) {
+            return route('onboarding', absolute: false);
+        }
+
+        if ($this->isCashierOnly()) {
+            return route('cashier', absolute: false);
+        }
+
+        return route('dashboard', absolute: false);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -43,9 +77,18 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'onboarding_completed_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function branch(): BelongsTo
+    {
+        return $this->belongsTo(Branch::class);
+    }
 }
-
-

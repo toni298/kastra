@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="flex flex-col items-center justify-center py-12">
+  <div class="flex flex-col items-center justify-center py-12 dark:text-white">
     <Icon :name="icon" :size="48" color="text-secondary-400" class="mb-4" />
     <h3 class="text-lg font-medium text-secondary-700 mb-2">{{ title }}</h3>
     <p class="text-sm text-secondary-500">{{ message }}</p>

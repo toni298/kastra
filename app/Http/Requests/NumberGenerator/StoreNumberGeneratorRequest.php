@@ -1,0 +1,3 @@
+<?php
+namespace App\Http\Requests\NumberGenerator; use Illuminate\Foundation\Http\FormRequest; use Illuminate\Validation\Rule;
+class StoreNumberGeneratorRequest extends FormRequest { public function authorize(): bool { return $this->user()->can('number_generators.create'); } public function rules(): array { return ['document_type'=>['required','string','max:80'],'prefix'=>['required','string','max:30'],'format'=>['required','string','max:150','regex:/\{PREFIX\}.*\{SEQUENCE\}|\{SEQUENCE\}.*\{PREFIX\}/'],'reset_period'=>['required',Rule::in(['never','yearly','monthly'])],'aktif'=>['required','boolean']]; } }

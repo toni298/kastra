@@ -1,52 +1,68 @@
 <script setup>
 import { computed } from 'vue'
-import GuestLayout from '@/Layouts/GuestLayout.vue'
-import PrimaryButton from '@/Components/PrimaryButton.vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import Button from '@/Components/UI/Button.vue'
+import GuestLayout from '@/Layouts/GuestLayout.vue'
 
 const props = defineProps({
-  status: {
-    type: String,
-  },
+  status: { type: String, default: '' },
 })
 
 const form = useForm({})
 
+const verificationLinkSent = computed(() => props.status === 'verification-link-sent')
+
 const submit = () => {
   form.post(route('verification.send'))
 }
-
-const verificationLinkSent = computed(() => props.status === 'verification-link-sent')
 </script>
 
 <template>
   <GuestLayout>
-    <Head title="Email Verification" />
+    <Head title="Verifikasi Email" />
 
-    <div class="mb-4 text-sm text-gray-600">
-      Thanks for signing up! Before getting started, could you verify your email address by clicking
-      on the link we just emailed to you? If you didn't receive the email, we will gladly send you
-      another.
+    <div class="mb-8">
+      <p class="text-sm font-medium uppercase tracking-[0.18em] text-emerald-600">
+        Satu langkah lagi
+      </p>
+      <h1 class="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
+        Verifikasi email Anda
+      </h1>
+      <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+        Kami telah mengirimkan tautan verifikasi ke alamat email Anda. Buka tautan tersebut untuk
+        mengaktifkan akun dan mulai menggunakan Kastra.
+      </p>
     </div>
 
-    <div v-if="verificationLinkSent" class="mb-4 text-sm font-medium text-green-600">
-      A new verification link has been sent to the email address you provided during registration.
+    <div
+      v-if="verificationLinkSent"
+      class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+    >
+      Tautan verifikasi baru telah dikirim ke alamat email yang Anda gunakan saat mendaftar.
     </div>
 
-    <form @submit.prevent="submit">
-      <div class="mt-4 flex items-center justify-between">
-        <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-          Resend Verification Email
-        </PrimaryButton>
-
-        <Link
-          :href="route('logout')"
-          method="post"
-          as="button"
-          class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >Log Out</Link
-        >
-      </div>
+    <form class="space-y-5" @submit.prevent="submit">
+      <Button
+        type="submit"
+        size="lg"
+        class="w-full"
+        :loading="form.processing"
+        :disabled="form.processing"
+      >
+        Kirim ulang email verifikasi
+      </Button>
     </form>
+
+    <p class="mt-8 text-center text-sm text-slate-600 dark:text-slate-300">
+      Ingin menggunakan akun lain?
+      <Link
+        :href="route('logout')"
+        method="post"
+        as="button"
+        class="font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400"
+      >
+        Keluar
+      </Link>
+    </p>
   </GuestLayout>
 </template>

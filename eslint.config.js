@@ -23,6 +23,8 @@ export default [
         sessionStorage: 'readonly',
         route: 'readonly',
         URL: 'readonly',
+        FormData: 'readonly',
+        File: 'readonly',
       },
     },
     rules: {

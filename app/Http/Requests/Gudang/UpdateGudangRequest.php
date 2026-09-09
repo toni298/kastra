@@ -1,0 +1,2 @@
+<?php
+namespace App\Http\Requests\Gudang; use Illuminate\Validation\Rule; class UpdateGudangRequest extends \App\Http\Requests\Organization\OrganizationRequest { protected string $module='gudang'; public function rules(): array { $id=$this->route('gudang')?->id; return [...$this->commonRules(),'kode'=>['nullable','string','max:50',Rule::unique('gudang','kode')->where('company_id',$this->user()->company_id)->ignore($id)]]; } }

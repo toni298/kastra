@@ -7,14 +7,12 @@ use App\Http\Requests\Auth\RegisterUserRequest;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
-use Spatie\Permission\Models\Role;
+use App\Models\Role;
 
 class RegisteredUserController extends Controller
 {
@@ -41,16 +39,18 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($validated['password']),
         ]);
 
-        $role = User::query()->whereKeyNot($user->getKey())->exists() ? 'karyawan' : 'owner';
-        Role::findOrCreate($role, 'web');
-        $user->assignRole($role);
+        // Setiap user yang registrasi adalah Owner
+        $ownerRole = Role::query()->firstOrCreate([
+            'company_id' => null,
+            'name' => 'owner',
+            'guard_name' => 'web',
+        ]);
+        $user->assignRole($ownerRole);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('onboarding');
     }
 }
-
-

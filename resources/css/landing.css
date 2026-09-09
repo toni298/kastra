@@ -1,0 +1,95 @@
+@config "../../tailwind.landing.config.js";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .decor-dot-grid {
+    background-image: radial-gradient(circle, rgb(16 185 129 / 0.28) 1.5px, transparent 1.5px);
+    background-size: 18px 18px;
+    mask-image: linear-gradient(to left, black, transparent);
+  }
+
+  .decor-dark-grid {
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: linear-gradient(to left, black, transparent);
+  }
+
+  .decor-orbit::after {
+    position: absolute;
+    inset: 22%;
+    content: '';
+    border: 1px dashed rgb(16 185 129 / 0.2);
+    border-radius: 9999px;
+  }
+
+  .decor-circuit {
+    background: linear-gradient(90deg, transparent, rgb(52 211 153 / 0.45), rgb(96 165 250 / 0.4));
+  }
+
+  .decor-float {
+    animation: decor-float 7s ease-in-out infinite;
+  }
+
+  .decor-float-slow {
+    animation: decor-float 9s ease-in-out infinite reverse;
+  }
+
+  .decor-spin {
+    animation: decor-spin 24s linear infinite;
+  }
+
+  .decor-pulse {
+    animation: decor-pulse 3.5s ease-in-out infinite;
+  }
+}
+
+@keyframes decor-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(6deg);
+  }
+
+  50% {
+    transform: translate3d(0, -10px, 0) rotate(2deg);
+  }
+}
+
+@keyframes decor-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes decor-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: translateY(-50%) scale(0.9);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .decor-float,
+  .decor-float-slow,
+  .decor-spin,
+  .decor-pulse {
+    animation: none;
+  }
+
+  [data-landing-motion] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}

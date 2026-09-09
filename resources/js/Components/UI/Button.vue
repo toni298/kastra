@@ -1,15 +1,15 @@
-﻿<template>
+<template>
   <button
     :type="type"
     :disabled="disabled || loading"
     :class="[
-      'inline-flex items-center justify-center font-medium transition duration-150 rounded-lg',
+      'inline-flex items-center justify-center rounded-xl font-medium transition duration-150 focus:outline-none focus:ring-4',
       sizeClasses,
       variantClasses,
-      { 'opacity-50 cursor-not-allowed': disabled || loading },
+      { 'cursor-not-allowed opacity-60': disabled || loading },
     ]"
   >
-    <icon v-if="loading" name="loader-2" class="w-4 h-4 mr-2 animate-spin" />
+    <Icon v-if="loading" name="loader-2" class="mr-2 size-4 animate-spin" />
     <slot></slot>
   </button>
 </template>
@@ -28,20 +28,25 @@ const props = defineProps({
 
 const sizeClasses = computed(() => {
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
+    sm: 'px-3 py-2 text-sm',
+    md: 'px-4 py-2.5 text-sm',
     lg: 'px-6 py-3 text-base',
   }
-  return sizes[props.size]
+
+  return sizes[props.size] ?? sizes.md
 })
 
 const variantClasses = computed(() => {
   const variants = {
-    primary: 'bg-primary-500 hover:bg-primary-600 text-white shadow-soft',
-    secondary: 'bg-secondary-200 hover:bg-secondary-300 text-secondary-800',
-    danger: 'bg-red-500 hover:bg-red-600 text-white',
-    ghost: 'bg-transparent hover:bg-secondary-100 text-secondary-700',
+    primary:
+      'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 focus:ring-emerald-500/20 dark:bg-emerald-500 dark:text-[#071426] dark:hover:bg-emerald-400',
+    secondary:
+      'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50 focus:ring-slate-300/30 dark:border-[#29476b] dark:bg-[#102542] dark:text-white dark:hover:bg-[#163354]',
+    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500/20',
+    ghost:
+      'bg-transparent text-slate-700 hover:bg-slate-100 focus:ring-slate-300/30 dark:text-slate-200 dark:hover:bg-[#102542]',
   }
-  return variants[props.variant]
+
+  return variants[props.variant] ?? variants.primary
 })
 </script>

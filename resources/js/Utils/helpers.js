@@ -18,4 +18,12 @@ const formatDate = (date) => {
   return `${day}/${month}/${year}`
 }
 
-export { formatCurrency, formatDate }
+const formatQty = (value) => {
+  const number = Number(value)
+
+  return Number.isFinite(number)
+    ? number.toLocaleString('id-ID', { maximumFractionDigits: 3 })
+    : '-'
+}
+
+export { formatCurrency, formatDate, formatQty }

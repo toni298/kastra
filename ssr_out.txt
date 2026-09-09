@@ -1,0 +1,12 @@
+Starting SSR server on port 13714...
+Inertia SSR server started.
+TypeError: Invalid URL
+    at new URL (node:internal/url:828:25)
+    at setup (file:///G:/Project/kastra2/bootstrap/ssr/ssr.js:422:21)
+    at file:///G:/Project/kastra2/node_modules/@inertiajs/vue3/dist/index.esm.js:538:14
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async createInertiaApp (file:///G:/Project/kastra2/node_modules/@inertiajs/vue3/dist/index.esm.js:525:18)
+    at async Server.<anonymous> (file:///G:/Project/kastra2/node_modules/@inertiajs/core/dist/server.esm.js:50:37) {
+  code: 'ERR_INVALID_URL',
+  input: 'undefined'
+}

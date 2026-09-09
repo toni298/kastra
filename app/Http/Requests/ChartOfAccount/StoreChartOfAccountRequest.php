@@ -1,0 +1,3 @@
+<?php
+namespace App\Http\Requests\ChartOfAccount; use Illuminate\Foundation\Http\FormRequest; use Illuminate\Validation\Rule;
+class StoreChartOfAccountRequest extends FormRequest { public function authorize(): bool { return $this->user()->can('coa.create'); } public function rules(): array { return ['parent_id'=>['nullable','uuid',Rule::exists('chart_of_accounts','id')->where('company_id',$this->user()->company_id)],'kode'=>['required','string','max:50',Rule::unique('chart_of_accounts','kode')->where('company_id',$this->user()->company_id)],'nama'=>['required','string','max:255'],'kategori'=>['required',Rule::in(['aset','liabilitas','ekuitas','pendapatan','beban'])],'is_header'=>['required','boolean'],'aktif'=>['required','boolean']]; } }
