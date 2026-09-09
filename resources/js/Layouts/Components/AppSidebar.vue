@@ -19,7 +19,7 @@ import {
   X,
 } from '@lucide/vue'
 import { computed } from 'vue'
-import { useRoute } from '../../../../vendor/tightenco/ziggy/src/js'
+import { useRoute } from 'ziggy-js'
 
 const props = defineProps({ open: { type: Boolean, default: false } })
 const emit = defineEmits(['close'])

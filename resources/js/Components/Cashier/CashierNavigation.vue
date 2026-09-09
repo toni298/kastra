@@ -12,7 +12,7 @@ import {
   ShoppingBag,
   ShoppingCart,
 } from 'lucide-vue-next'
-import { useRoute } from '../../../../vendor/tightenco/ziggy/src/js'
+import { useRoute } from 'ziggy-js'
 import { useAccessControl } from '@/Composables/useAccessControl'
 
 const page = usePage()

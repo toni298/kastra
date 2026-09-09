@@ -3,7 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { ChevronDown, LogOut, Settings, ShieldCheck, UserRound } from 'lucide-vue-next'
 import CashierNavigation from './CashierNavigation.vue'
-import { useRoute } from '../../../../vendor/tightenco/ziggy/src/js'
+import { useRoute } from 'ziggy-js'
 
 const page = usePage()
 const route = useRoute(page.props.ziggy)
