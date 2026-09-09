@@ -2,7 +2,7 @@
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "public",
-  "installCommand": "composer install --no-dev --optimize-autoloader && npm install",
+  "installCommand": "curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && composer install --no-dev --optimize-autoloader && npm install",
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.7.3"
