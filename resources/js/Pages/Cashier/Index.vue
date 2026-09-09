@@ -10,7 +10,7 @@ import CashierPaymentModal from './Components/CashierPaymentModal.vue'
 import CustomerModal from '@/Pages/Sales/Components/CustomerModal.vue'
 import ThermalPaperSetting from './Components/ThermalPaperSetting.vue'
 import { autoPrintThermalReceipt } from '@/Utils/thermalReceiptExport'
-import { useRoute } from '../../../../vendor/tightenco/ziggy/src/js'
+import { useRoute } from 'ziggy-js'
 
 const props = defineProps({
   products: { type: Object, default: () => ({ data: [], links: {} }) },
