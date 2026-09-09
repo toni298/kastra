@@ -9,7 +9,7 @@ import DataTable from '@/Components/UI/DataTable.vue'
 import IconButton from '@/Components/UI/IconButton.vue'
 import SalesTransactionFilters from './SalesTransactionFilters.vue'
 import { useAccessControl } from '@/Composables/useAccessControl'
-import { useRoute } from '../../../../../vendor/tightenco/ziggy/src/js'
+import { useRoute } from 'ziggy-js'
 
 const props = defineProps({
   items: { type: Object, default: () => ({ data: [] }) },
