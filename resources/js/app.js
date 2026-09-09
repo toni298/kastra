@@ -16,9 +16,8 @@ createInertiaApp({
     let runtime = null
 
     if (!isLanding) {
-      const [motion, ziggy, toast, axiosModule, , toastNotifications] = await Promise.all([
+      const [motion, toast, axiosModule, , toastNotifications] = await Promise.all([
         import('@vueuse/motion'),
-        import('../../vendor/tightenco/ziggy'),
         import('vue-toastification'),
         import('axios'),
         import('vue-toastification/dist/index.css'),
@@ -26,7 +25,7 @@ createInertiaApp({
       ])
 
       ToastNotifications = toastNotifications.default
-      runtime = { motion, ziggy, toast, axios: axiosModule.default }
+      runtime = { motion, toast, axios: axiosModule.default }
     }
 
     const vueApp = createApp({
@@ -36,13 +35,12 @@ createInertiaApp({
 
     if (runtime) {
       const { MotionPlugin } = runtime.motion
-      const { ZiggyVue } = runtime.ziggy
       const { default: Toast, POSITION } = runtime.toast
 
       window.axios = runtime.axios
       window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
 
-      vueApp.use(MotionPlugin).use(ZiggyVue).use(Toast, {
+      vueApp.use(MotionPlugin).use(Toast, {
         position: POSITION.TOP_RIGHT,
         timeout: 4500,
         closeOnClick: true,
