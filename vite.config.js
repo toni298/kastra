@@ -3,6 +3,11 @@ import laravel from 'laravel-vite-plugin'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      'lucide-vue-next': '@lucide/vue',
+    },
+  },
   plugins: [
     laravel({
       input: ['resources/js/app.js', 'resources/js/landing.js', 'resources/css/landing.css'],
