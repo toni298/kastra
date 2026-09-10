@@ -4,7 +4,7 @@ import { renderToString } from '@vue/server-renderer'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import { createSSRApp, h } from 'vue'
 import { MotionPlugin } from '@vueuse/motion'
-import { ZiggyVue } from '../../vendor/tightenco/ziggy'
+import { ZiggyVue } from 'ziggy-js'
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
 
