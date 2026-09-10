@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import AppHeader from './Components/AppHeader.vue'
 import AppSidebar from './Components/AppSidebar.vue'
+import ToastNotifications from '@/Components/Feedback/ToastNotifications.vue'
 
 const sidebarOpen = ref(false)
 </script>
@@ -19,5 +20,6 @@ const sidebarOpen = ref(false)
       </AppHeader>
       <main class="p-5 lg:p-8"><slot></slot></main>
     </div>
+    <ToastNotifications />
   </div>
 </template>

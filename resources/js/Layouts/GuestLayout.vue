@@ -2,6 +2,7 @@
 import { Link } from '@inertiajs/vue3'
 import { Moon, Sun } from '@lucide/vue'
 import AuthVisual from '@/Layouts/AuthVisual.vue'
+import ToastNotifications from '@/Components/Feedback/ToastNotifications.vue'
 import { useTheme } from '@/Composables/useTheme'
 
 const { isDark, toggleTheme } = useTheme()
@@ -42,5 +43,6 @@ const { isDark, toggleTheme } = useTheme()
         <slot></slot>
       </div>
     </main>
+    <ToastNotifications />
   </div>
 </template>

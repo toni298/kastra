@@ -2,6 +2,30 @@
 
 use Illuminate\Http\Request;
 
+// Vercel's filesystem is ephemeral and must not be used for request state.
+$serverlessDefaults = [
+    'APP_DEBUG' => 'false',
+    'SESSION_DRIVER' => 'cookie',
+    'CACHE_STORE' => 'array',
+    'DEBUGBAR_ENABLED' => 'false',
+    'DEBUGBAR_STORAGE_ENABLED' => 'false',
+    'DEBUGBAR_INJECT' => 'false',
+];
+$isVercel = getenv('VERCEL') === '1' || getenv('NOW_REGION') !== false;
+
+foreach ($serverlessDefaults as $key => $value) {
+    $currentValue = getenv($key);
+    $mustReplaceFilesystemState = $isVercel
+        && in_array($key, ['SESSION_DRIVER', 'CACHE_STORE'], true)
+        && $currentValue === 'file';
+
+    if ($currentValue === false || $mustReplaceFilesystemState) {
+        putenv("{$key}={$value}");
+        $_ENV[$key] = $value;
+        $_SERVER[$key] = $value;
+    }
+}
+
 // Buat direktori temporary yang dibutuhkan
 $directories = [
     '/tmp/storage/framework/views',

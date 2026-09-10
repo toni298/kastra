@@ -16,7 +16,9 @@ return [
      |
      */
 
-    'enabled' => env('DEBUGBAR_ENABLED'),
+    'enabled' => env('DEBUGBAR_ENABLED', false)
+        && (bool) config('app.debug')
+        && ! app()->environment('production'),
     'collect_jobs' => env('DEBUGBAR_COLLECT_JOBS', false),
     'except' => [
         'telescope*',
@@ -263,7 +265,9 @@ return [
     | Leaving it to null will allow localhost only.
     */
     'storage' => [
-        'enabled'    => env('DEBUGBAR_STORAGE_ENABLED', true),
+        'enabled'    => env('DEBUGBAR_STORAGE_ENABLED', false)
+            && (bool) config('app.debug')
+            && ! app()->environment('production'),
         'open'       => env('DEBUGBAR_OPEN_STORAGE'), // bool/callback.
         'driver'     => env('DEBUGBAR_STORAGE_DRIVER', 'file'), // redis, file, sqlite, pdo, custom
         'path'       => env('DEBUGBAR_STORAGE_PATH', storage_path('debugbar')), // For file driver
@@ -344,7 +348,9 @@ return [
      |
      */
 
-    'inject' => env('DEBUGBAR_INJECT', true),
+    'inject' => env('DEBUGBAR_INJECT', false)
+        && (bool) config('app.debug')
+        && ! app()->environment('production'),
 
     /*
      |--------------------------------------------------------------------------
