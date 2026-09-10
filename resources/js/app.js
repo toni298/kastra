@@ -2,13 +2,12 @@ import '../css/app.css'
 
 import { createInertiaApp } from '@inertiajs/vue3'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
-import { createApp, Fragment, h } from 'vue'
+import { createApp, h } from 'vue'
 import { MotionPlugin } from '@vueuse/motion'
 import { ZiggyVue } from 'ziggy-js'
 import Toast, { POSITION } from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import axios from 'axios'
-import ToastNotifications from './Components/Feedback/ToastNotifications.vue'
 
 // Konfigurasi Axios Global
 window.axios = axios
@@ -26,13 +25,7 @@ createInertiaApp({
     ),
 
   setup({ el, App, props, plugin }) {
-    return createApp({
-      render: () =>
-        h(Fragment, [
-          h(App, props),
-          h(ToastNotifications),
-        ]),
-    })
+    return createApp({ render: () => h(App, props) })
       .use(plugin)
       .use(MotionPlugin)
       .use(ZiggyVue)
