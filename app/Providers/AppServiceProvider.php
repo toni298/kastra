@@ -51,6 +51,7 @@ use App\Policies\UserPolicy;
 use App\Services\CompanyContext;
 use App\Services\InertiaAuthorizationService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
 
@@ -67,6 +68,9 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if (config('app.env') === 'production' || request()->header('x-forwarded-proto') === 'https') {
+            URL::forceScheme('https');
+        }
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(Permission::class, PermissionPolicy::class);
