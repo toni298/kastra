@@ -1,23 +1,11 @@
 <?php
 
-// Set direktori penyimpanan dinamis ke /tmp untuk serverless Vercel
-putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
-$_ENV['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
-
-putenv('APP_CONFIG_CACHE=/tmp/bootstrap/cache/config.php');
-$_ENV['APP_CONFIG_CACHE'] = '/tmp/bootstrap/cache/config.php';
-
-putenv('APP_ROUTES_CACHE=/tmp/bootstrap/cache/routes.php');
-$_ENV['APP_ROUTES_CACHE'] = '/tmp/bootstrap/cache/routes.php';
-
-putenv('APP_EVENTS_CACHE=/tmp/bootstrap/cache/events.php');
-$_ENV['APP_EVENTS_CACHE'] = '/tmp/bootstrap/cache/events.php';
-
-// Buat direktori temporary yang dibutuhkan
+// Buat direktori temporary yang dibutuhkan Laravel
 $directories = [
     '/tmp/storage/framework/views',
     '/tmp/storage/framework/cache',
     '/tmp/storage/framework/sessions',
+    '/tmp/storage/logs',
     '/tmp/bootstrap/cache',
 ];
 
@@ -29,14 +17,30 @@ foreach ($directories as $dir) {
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+try {
+    $app = require_once __DIR__ . '/../bootstrap/app.php';
+    
+    // Set storage path ke /tmp agar writable di Vercel
+    $app->useStoragePath('/tmp/storage');
 
-$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+    $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
 
-$response = $kernel->handle(
-    $request = Illuminate\Http\Request::capture()
-);
+    $response = $kernel->handle(
+        $request = Illuminate\Http\Request::capture()
+    );
 
-$response->send();
+    $response->send();
 
-$kernel->terminate($request, $response);
+    $kernel->terminate($request, $response);
+} catch (\Throwable $e) {
+    // Tangkap eror asli secara langsung sebelum memicu eror sekunder pada view
+    http_response_code(500);
+    header('Content-Type: text/plain');
+    
+    $prev = $e->getPrevious();
+    echo "=== ORIGINAL ERROR ===\n";
+    echo ($prev ? $prev->getMessage() : $e->getMessage()) . "\n\n";
+    echo "=== TRACE ===\n";
+    echo ($prev ? $prev->getTraceAsString() : $e->getTraceAsString());
+    exit;
+}
