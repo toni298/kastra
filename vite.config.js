@@ -23,6 +23,9 @@ export default defineConfig({
       },
     }),
   ],
+  build: {
+    modulePreload: false, // Mencegah preloading seluruh file JS di halaman awal
+  },
   // Make FullCalendar client-only (skip SSR)
   ssr: {
     noExternal: [/^@fullcalendar\/.*/],
