@@ -1,6 +1,19 @@
 <?php
 
-// Buat direktori temporary yang dibutuhkan Laravel di Vercel
+// Set direktori penyimpanan dinamis ke /tmp untuk serverless Vercel
+putenv('VIEW_COMPILED_PATH=/tmp/storage/framework/views');
+$_ENV['VIEW_COMPILED_PATH'] = '/tmp/storage/framework/views';
+
+putenv('APP_CONFIG_CACHE=/tmp/bootstrap/cache/config.php');
+$_ENV['APP_CONFIG_CACHE'] = '/tmp/bootstrap/cache/config.php';
+
+putenv('APP_ROUTES_CACHE=/tmp/bootstrap/cache/routes.php');
+$_ENV['APP_ROUTES_CACHE'] = '/tmp/bootstrap/cache/routes.php';
+
+putenv('APP_EVENTS_CACHE=/tmp/bootstrap/cache/events.php');
+$_ENV['APP_EVENTS_CACHE'] = '/tmp/bootstrap/cache/events.php';
+
+// Buat direktori temporary yang dibutuhkan
 $directories = [
     '/tmp/storage/framework/views',
     '/tmp/storage/framework/cache',
