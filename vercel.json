@@ -1,6 +1,8 @@
 {
   "version": 2,
   "outputDirectory": "public",
+  "VIEW_COMPILED_PATH": "/tmp/storage/framework/views",
+  "SESSION_DRIVER": "cookie",
   "functions": {
     "api/index.php": {
       "runtime": "vercel-php@0.7.3"
