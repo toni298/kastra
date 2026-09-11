@@ -1,7 +1,7 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
-import { Eye, Filter, MoreVertical, Pencil, Plus, Printer, ShoppingCart } from 'lucide-vue-next'
+import { Eye, Filter, MoreVertical, Pencil, Plus, ShoppingCart, Trash2 } from 'lucide-vue-next'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 import DataPanel from '@/Components/UI/DataPanel.vue'
@@ -65,7 +65,9 @@ const statusLabel = (row) =>
           ? 'Dibatalkan'
           : row.status === 'draft'
             ? 'Draft'
-            : row.status
+            : row.status === 'pending'
+              ? 'Dalam Proses'
+              : row.status
 const paymentLabel = (row) => (row.payment_status === 'paid' ? 'Lunas' : 'Belum Lunas')
 const documentLabel = (row) => (row.document_type === 'invoice' ? 'Invoice' : 'Penjualan')
 const money = (value) => `Rp ${Number(value || 0).toLocaleString('id-ID')}`
@@ -78,25 +80,17 @@ const variant = (value) =>
       : value === 'Retur Penuh'
         ? 'error'
         : 'warning'
-const actions = (row) => [
-  { id: 'transaction-detail', label: 'Detail', icon: Eye },
-  ...(editable(row) && can('penjualan.transactions.edit')
-    ? [{ id: 'transaction-edit', label: 'Edit', icon: Pencil }]
-    : []),
-  ...(row.status === 'completed' || row.status === 'partial_return'
-    ? [
-        ...(can('penjualan.transactions.payment')
-          ? [{ id: 'transaction-payment', label: 'Pembayaran', icon: Printer }]
-          : []),
-        ...(can('penjualan.transactions.return')
-          ? [{ id: 'transaction-return', label: 'Retur', icon: Printer }]
-          : []),
-      ]
-    : []),
-  ...(can('penjualan.transactions.print')
-    ? [{ id: 'transaction-print', label: 'Cetak', icon: Printer }]
-    : []),
-]
+const actions = (row) => {
+  return [
+    { id: 'transaction-detail', label: 'Detail', icon: Eye },
+    ...(editable(row) && can('penjualan.transactions.edit')
+      ? [{ id: 'transaction-edit', label: 'Edit', icon: Pencil }]
+      : []),
+    ...(editable(row) && can('penjualan.transactions.delete')
+      ? [{ id: 'transaction-delete', label: 'Hapus', icon: Trash2 }]
+      : []),
+  ]
+}
 const requestData = (overrides = {}) => ({
   tab: activeTab.value === 'all' ? undefined : activeTab.value,
   search: search.value || undefined,
@@ -106,7 +100,7 @@ const requestData = (overrides = {}) => ({
 })
 const request = (data = requestData()) => emit('request', { url: transactionIndexUrl.value, data })
 
-const navigate = ({ cursor, direction }) => {
+const navigate = ({ cursor }) => {
   if (!cursor) return
 
   const url = new URL(transactionIndexUrl.value, window.location.origin)

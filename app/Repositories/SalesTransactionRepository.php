@@ -19,7 +19,7 @@ class SalesTransactionRepository
 
         return SalesTransaction::query()
             ->select(['id', 'company_id', 'branch_id', 'customer_id', 'created_by', 'transaction_number', 'document_type', 'transaction_date', 'due_date', 'status', 'payment_status', 'discount', 'tax', 'total'])
-            ->with(['branch:id,name', 'customer:id,name', 'creator:id,name'])
+            ->with(['branch:id,name', 'customer:id,name', 'creator:id,name', 'finalizedBy:id,name'])
             ->withCount('details')
             ->where('company_id', $companyId)
             ->when($filters['tab'] ?? null, function ($query, $tab): void {
@@ -125,7 +125,7 @@ class SalesTransactionRepository
     public function findWithDetails(string $companyId, string $id): SalesTransaction
     {
         return SalesTransaction::query()
-            ->with(['branch:id,name,address,city,province,postal_code,phone,email', 'customer:id,name,telp,address', 'creator:id,name', 'details:id,sales_transaction_id,product_id,quantity,unit_price,subtotal', 'details.product:id,name,sku,unit_id', 'details.product.unit:id,name', 'payments', 'returns.details'])
+            ->with(['branch:id,name,address,city,province,postal_code,phone,email', 'customer:id,name,telp,address', 'creator:id,name', 'finalizedBy:id,name', 'details:id,sales_transaction_id,product_id,quantity,unit_price,subtotal', 'details.product:id,name,sku,unit_id', 'details.product.unit:id,name', 'payments', 'returns.details'])
             ->where('company_id', $companyId)
             ->findOrFail($id);
     }

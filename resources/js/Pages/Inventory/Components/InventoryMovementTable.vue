@@ -12,12 +12,11 @@ const props = defineProps({
   pagination: { type: Object, default: () => ({}) },
   filters: { type: Object, default: () => ({}) },
   loading: { type: Boolean, default: false },
-  loadingMore: { type: Boolean, default: false },
   summary: { type: Object, default: () => ({}) },
   options: { type: Object, default: () => ({ branches: [], warehouses: [], users: [] }) },
 })
 
-const emit = defineEmits(['request', 'load-more'])
+const emit = defineEmits(['request', 'navigate'])
 const rows = computed(() => props.items?.data ?? [])
 const search = computed(() => props.filters.search ?? '')
 const formatDate = (value) => (value ? new Date(value).toLocaleString('id-ID') : '-')
@@ -33,7 +32,12 @@ const request = (data = {}) =>
   })
 const filter = ({ search: value }) => request({ search: value || undefined })
 const changePerPage = (perPage) => request({ per_page: perPage })
-const loadMore = (url) => emit('load-more', url)
+const navigate = ({ cursor }) => {
+  if (!cursor) return
+  const url = new URL(route('inventory.movements'), window.location.origin)
+  url.searchParams.set('cursor', cursor)
+  emit('request', { tab: 'movements', url: url.toString(), replace: true })
+}
 const applyFilters = (filters) => {
   filterOpen.value = false
   request({ ...filters })
@@ -83,9 +87,6 @@ onBeforeUnmount(() => document.removeEventListener('keydown', closeMenuOnEscape)
       :pagination="pagination"
       :per-page="Number(pagination?.meta?.per_page ?? 25)"
       :loading="loading"
-      :loading-more="loadingMore"
-      infinite
-      require-scroll-for-load-more
       searchable
       :search="search"
       search-placeholder="Cari produk, SKU, atau referensi..."
@@ -94,7 +95,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', closeMenuOnEscape)
       empty-message="Belum ada mutasi stok yang tercatat."
       @filter="filter"
       @per-page-change="changePerPage"
-      @load-more="loadMore"
+      @navigate="navigate"
     >
       <template #filters>
         <div ref="filterButton">

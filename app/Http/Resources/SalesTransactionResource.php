@@ -41,6 +41,8 @@ class SalesTransactionResource extends JsonResource
             'due_date_iso' => $this->due_date?->format('Y-m-d'),
             'due_status' => $this->dueStatus(),
             'status' => $this->status,
+            'finalized_at' => $this->finalized_at?->toISOString(),
+            'finalized_by' => $this->when($this->relationLoaded('finalizedBy'), fn() => $this->finalizedBy?->only('id', 'name')),
             'payment_status' => $this->payment_status,
             'payment_method' => $this->payment_method ?? ($this->relationLoaded('payment') ? $this->payment?->payment_method : null),
             'delivery_method' => $this->delivery_method,

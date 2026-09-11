@@ -25,6 +25,8 @@ watch(
 )
 
 const removeExisting = (image) => {
+  if (!image?.id) return
+
   existingImages.value = existingImages.value.filter((item) => item.id !== image.id)
   emit('removed', image.id)
 }

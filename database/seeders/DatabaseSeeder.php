@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->call(\Database\Seeders\PurchasesPermissionSeeder::class);
         $this->call(\Database\Seeders\SalesPermissionSeeder::class);
         $this->call(\Database\Seeders\ReminderPermissionSeeder::class);
+        $this->call(\Database\Seeders\HrPermissionSeeder::class);
         $this->call(PermissionGroupSeeder::class);
         $this->call(SupplierPermissionSeeder::class);
         // $this->call(ProductStockSeeder::class); // Requires RetailProductSeeder

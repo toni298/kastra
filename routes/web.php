@@ -53,6 +53,11 @@ use App\Http\Controllers\ReportsStockController;
 use App\Http\Controllers\ReportsFinanceController;
 use App\Http\Controllers\Accounting\ShowAccountingSettingsController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\HR\HRAttendanceController;
+use App\Http\Controllers\HR\HRCommissionController;
+use App\Http\Controllers\HR\HRPayrollController;
+use App\Http\Controllers\HR\HRSummaryController;
 use App\Http\Controllers\Api\InventoryMovementController;
 use Illuminate\Support\Facades\Route;
 
@@ -88,6 +93,15 @@ Route::middleware(['auth', 'verified', 'onboarded', 'company.context', 'cashier.
     Route::put('users/{user}', [UserController::class, 'update'])->middleware('can:users.edit')->name('users.update');
     Route::patch('users/{user}', [UserController::class, 'update'])->middleware('can:users.edit')->name('users.update.patch');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->middleware('can:users.delete')->name('users.destroy');
+    Route::get('hr/summary', HRSummaryController::class)->middleware('can:hr.employees.view')->name('hr.summary.index');
+    Route::get('hr/employees', [EmployeeController::class, 'index'])->middleware('can:hr.employees.view')->name('hr.employees.index');
+    Route::get('hr/attendance', HRAttendanceController::class)->middleware('can:hr.employees.view')->name('hr.attendance.index');
+    Route::get('hr/commission', HRCommissionController::class)->middleware('can:hr.employees.view')->name('hr.commission.index');
+    Route::get('hr/payroll', HRPayrollController::class)->middleware('can:hr.employees.view')->name('hr.payroll.index');
+    Route::post('hr/employees', [EmployeeController::class, 'store'])->middleware('can:hr.employees.create')->name('hr.employees.store');
+    Route::put('hr/employees/{employee}', [EmployeeController::class, 'update'])->middleware('can:hr.employees.edit')->name('hr.employees.update');
+    Route::delete('hr/employees/{employee}', [EmployeeController::class, 'destroy'])->middleware('can:hr.employees.delete')->name('hr.employees.destroy');
+    Route::post('hr/employees/{employee}/reset-pin', [EmployeeController::class, 'resetPin'])->middleware('can:hr.employees.edit')->name('hr.employees.reset-pin');
     Route::get('cabang', [CabangController::class, 'index'])->middleware('can:cabang.view')->name('cabang.index');
     Route::post('cabang', [CabangController::class, 'store'])->middleware('can:cabang.create')->name('cabang.store');
     Route::put('cabang/{cabang}', [CabangController::class, 'update'])->middleware('can:cabang.edit')->name('cabang.update');
@@ -164,6 +178,7 @@ Route::middleware(['auth', 'verified', 'onboarded', 'company.context', 'cashier.
     Route::put('sales/transactions/{transaction}', [SalesTransactionController::class, 'update'])->middleware('can:penjualan.transactions.edit')->name('sales.transactions.update');
     Route::patch('sales/transactions/{transaction}', [SalesTransactionController::class, 'update'])->middleware('can:penjualan.transactions.edit')->name('sales.transactions.update.patch');
     Route::delete('sales/transactions/{transaction}', [SalesTransactionController::class, 'destroy'])->middleware('can:penjualan.transactions.delete')->name('sales.transactions.destroy');
+    Route::post('sales/transactions/{transaction}/finalize', [SalesTransactionController::class, 'finalize'])->middleware('can:penjualan.transactions.edit')->name('sales.transactions.finalize');
     Route::post('sales/transactions/{transaction}/payments', [SalesTransactionController::class, 'payment'])->middleware('can:penjualan.transactions.payment')->name('sales.transactions.payments.store');
     Route::post('sales/transactions/{transaction}/complete', [SalesTransactionController::class, 'complete'])->middleware('can:penjualan.transactions.edit')->name('sales.transactions.complete');
     Route::post('sales/transactions/{transaction}/returns', [SalesTransactionController::class, 'return'])->middleware('can:penjualan.transactions.return')->name('sales.transactions.returns.store');

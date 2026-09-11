@@ -1,5 +1,5 @@
 import { router, usePage } from '@inertiajs/vue3'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 
 // AOQ agentOptimationQuery.md baris 36-47: kontrak JsonResource::collection($cursorPaginator).
 const emptyItems = {
@@ -68,7 +68,6 @@ export const useInventoryTabs = (props) => {
     return availableTab?.id ?? tabs.value[0]?.id ?? 'stock'
   })
   const loadingTab = ref(null)
-  const loadingMore = ref(false)
   const modal = ref(null)
   const selectedItem = ref(null)
   const transferDetailLoading = ref(false)
@@ -76,8 +75,6 @@ export const useInventoryTabs = (props) => {
   const opnameDetailLoading = ref(false)
   const opnameDetailError = ref(null)
   // AOQ baris 68: gabungkan data lama + baru di state halaman. Reset saat filter/search/perPage berubah.
-  const accumulated = reactive({ stock: [], transfer: [], opname: [], movements: [] })
-  const pendingMore = ref(null)
   const serverItems = (tab) => {
     if (tab === 'stock') return props.stockItems ?? emptyItems
     if (tab === 'transfer') return props.transferItems ?? emptyItems
@@ -85,27 +82,6 @@ export const useInventoryTabs = (props) => {
     if (tab === 'movements') return props.movementItems ?? emptyItems
     return emptyItems
   }
-
-  // Saat prop items berubah: jika pendingMore aktif -> append; selain itu -> replace (filter/reset).
-  const watchItems = (tab) =>
-    watch(
-      () => serverItems(tab),
-      (server) => {
-        const data = server?.data ?? []
-        if (pendingMore.value === tab) {
-          pendingMore.value = null
-          const existingIds = new Set(accumulated[tab].map((row) => row.id))
-          accumulated[tab].push(...data.filter((row) => !existingIds.has(row.id)))
-        } else {
-          accumulated[tab] = data.slice()
-        }
-      },
-      { immediate: true }
-    )
-  watchItems('stock')
-  watchItems('transfer')
-  watchItems('opname')
-  watchItems('movements')
 
   const can = (permission) => page.props.auth.permissions?.includes(permission)
   const tabs = computed(() => {
@@ -145,16 +121,6 @@ export const useInventoryTabs = (props) => {
     return allTabs.filter((tab) => can(tab.permission))
   })
 
-  // AOQ baris 68: batch awal menjadi dasar accumulated. Saat prop berubah (filter/reset), ganti penuh.
-  const itemsFor = (tab) => {
-    const base = serverItems(tab)
-    return { ...base, data: accumulated[tab] }
-  }
-  const paginationFor = (tab) => {
-    const base = serverItems(tab)
-    return { links: base.links ?? {}, meta: base.meta ?? {} }
-  }
-
   const activeComponentProps = computed(() => {
     if (currentTab.value === 'overview') {
       return {
@@ -164,7 +130,6 @@ export const useInventoryTabs = (props) => {
         filters: props.overviewFilters ?? {},
         options: props.overviewOptions ?? { categories: [] },
         loading: loadingTab.value === 'overview',
-        loadingMore: loadingMore.value && currentTab.value === 'overview',
         canDiscount: can('inventory.summary.discount'),
         canAdjustment:
           !props.enabledFeatures?.includes('purchase') && can('inventory.summary.adjust'),
@@ -172,13 +137,12 @@ export const useInventoryTabs = (props) => {
     }
     if (currentTab.value === 'stock') {
       return {
-        items: itemsFor('stock'),
-        pagination: paginationFor('stock'),
+        items: serverItems('stock'),
+        pagination: serverItems('stock'),
         filters: props.stockFilters ?? {},
         options: props.stockOptions ?? { warehouses: [], categories: [] },
         hasMultipleWarehouses: props.hasMultipleWarehouses ?? false,
         loading: loadingTab.value === 'stock',
-        loadingMore: loadingMore.value && currentTab.value === 'stock',
         canCreate: can('inventory.stock.create'),
         canEdit: can('inventory.stock.edit'),
         canDelete: can('inventory.stock.delete'),
@@ -187,12 +151,11 @@ export const useInventoryTabs = (props) => {
     }
     if (currentTab.value === 'transfer') {
       return {
-        items: itemsFor('transfer'),
-        pagination: paginationFor('transfer'),
+        items: serverItems('transfer'),
+        pagination: serverItems('transfer'),
         filters: props.transferFilters ?? {},
         options: props.transferOptions ?? { warehouses: [] },
         loading: loadingTab.value === 'transfer',
-        loadingMore: loadingMore.value && currentTab.value === 'transfer',
         canCreate: can('inventory.transfers.create'),
         canEdit: can('inventory.transfers.edit'),
         canDelete: can('inventory.transfers.delete'),
@@ -201,12 +164,11 @@ export const useInventoryTabs = (props) => {
     }
     if (currentTab.value === 'opname') {
       return {
-        items: itemsFor('opname'),
-        pagination: paginationFor('opname'),
+        items: serverItems('opname'),
+        pagination: serverItems('opname'),
         filters: props.opnameFilters ?? {},
         options: props.opnameOptions ?? { warehouses: [], branches: [] },
         loading: loadingTab.value === 'opname',
-        loadingMore: loadingMore.value && currentTab.value === 'opname',
         canCreate: can('inventory.opname.create'),
         canEdit: can('inventory.opname.edit'),
         canDelete: can('inventory.opname.delete'),
@@ -214,7 +176,7 @@ export const useInventoryTabs = (props) => {
       }
     }
     if (currentTab.value === 'movements') {
-      const items = itemsFor('movements')
+      const items = serverItems('movements')
       return {
         items,
         pagination: paginationFor('movements'),
@@ -222,7 +184,6 @@ export const useInventoryTabs = (props) => {
         summary: items?.summary ?? props.movementSummary ?? {},
         options: props.movementOptions ?? { branches: [], warehouses: [], users: [] },
         loading: loadingTab.value === 'movements',
-        loadingMore: loadingMore.value && currentTab.value === 'movements',
       }
     }
     return {}
@@ -250,36 +211,13 @@ export const useInventoryTabs = (props) => {
   }
   const selectTab = (tab) => {
     if (tab.id === currentTab.value) return
-    if (loadingTab.value || loadingMore.value) router.cancelAll({ sync: true })
+    if (loadingTab.value) router.cancelAll({ sync: true })
     requestTab(tab.id, route(tab.route), {}, true)
   }
   const requestActiveTab = ({ tab, url, data = {}, replace = false }) => {
     if (tab === currentTab.value) requestTab(tab, url, data, replace)
   }
   // AOQ baris 67-86: partial reload hanya prop daftar terkait, preserve scroll/state, append data lama+baru.
-  const loadMore = (url) => {
-    if (!url || loadingMore.value || loadingTab.value) return
-    const tab = currentTab.value
-    const itemsProp = tabItemsProp(tab)
-    if (!itemsProp) return
-
-    pendingMore.value = tab
-    loadingMore.value = true
-    router.get(
-      url,
-      {},
-      {
-        only: [itemsProp],
-        preserveScroll: true,
-        preserveState: true,
-        onFinish: () => {
-          loadingMore.value = false
-          if (pendingMore.value === tab) pendingMore.value = null
-        },
-      }
-    )
-  }
-
   const openAction = async ({ action, type, item = null }) => {
     if (type === 'opname' && action === 'process') {
       router.visit(route('inventory.opname.show', item.id))
@@ -351,7 +289,6 @@ export const useInventoryTabs = (props) => {
     activeComponentProps,
     selectTab,
     requestActiveTab,
-    loadMore,
     openAction,
     closeModal,
   }

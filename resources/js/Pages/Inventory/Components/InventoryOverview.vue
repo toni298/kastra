@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Head } from '@inertiajs/vue3'
 import {
   Boxes,
@@ -26,17 +26,15 @@ const props = defineProps({
   filters: { type: Object, default: () => ({}) },
   options: { type: Object, default: () => ({ categories: [], warehouses: [] }) },
   loading: { type: Boolean, default: false },
-  loadingMore: { type: Boolean, default: false },
   canDiscount: { type: Boolean, default: false },
   canAdjustment: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['navigate', 'request', 'load-more'])
+const emit = defineEmits(['navigate', 'request'])
 
 const search = ref(props.filters.search ?? '')
 const filterOpen = ref(false)
 const filterButton = ref(null)
-const filterPanelStyle = ref({})
 const transactionFilters = ref({
   category_id: props.filters.category_id ?? '',
   status: props.filters.status ?? '',
@@ -119,24 +117,20 @@ const applyFilters = (value) => {
   request()
 }
 
-const toggleFilter = async () => {
+const toggleFilter = () => {
   filterOpen.value = !filterOpen.value
-  if (!filterOpen.value) return
-  await nextTick()
-  const rect = filterButton.value?.getBoundingClientRect()
-  if (!rect) return
-  const width = Math.min(520, window.innerWidth - 24)
-  filterPanelStyle.value = {
-    left: `${Math.max(12, Math.min(rect.left, window.innerWidth - width - 12))}px`,
-    top: `${Math.min(rect.bottom + 8, window.innerHeight - 24)}px`,
-  }
 }
 
 const handleSort = ({ key, direction }) => {
   request({ sort: key, sort_direction: direction })
 }
 
-const loadMore = (url) => emit('load-more', url)
+const navigate = ({ cursor }) => {
+  if (!cursor) return
+  const url = new URL(route('inventory.index'), window.location.origin)
+  url.searchParams.set('cursor', cursor)
+  emit('request', { tab: 'overview', url: url.toString(), replace: true })
+}
 
 const drawerOpen = ref(false)
 const drawerLoading = ref(false)
@@ -230,14 +224,12 @@ const handleAdjustmentSaved = () => {
         :pagination="pagination"
         :per-page="pagination.per_page"
         :loading="loading"
-        :loading-more="loadingMore"
-        infinite
         sticky-toolbar
         searchable
         :search="search"
         search-placeholder="Cari produk atau SKU..."
         @filter="applySearch"
-        @load-more="loadMore"
+        @navigate="navigate"
         @per-page-change="(per) => request({ per_page: per })"
         @sort="handleSort"
       >
@@ -245,7 +237,7 @@ const handleAdjustmentSaved = () => {
           <Button v-if="canAdjustment" variant="secondary" size="sm" @click="openAdjustment">
             <PackagePlus :size="16" class="mr-2" />Penyesuaian Stok
           </Button>
-          <div ref="filterButton" class="relative">
+          <div ref="filterButton" class="relative inline-block">
             <Button variant="secondary" size="sm" @click="toggleFilter"
               ><Filter :size="16" class="mr-2" />Filter</Button
             >
@@ -254,16 +246,14 @@ const handleAdjustmentSaved = () => {
               class="absolute -right-1 -top-1 grid h-4 w-4 place-items-center rounded-full bg-emerald-600 text-[10px] text-white"
               >{{ activeFilterCount }}</span
             >
+            <InventoryStockFilters
+              v-if="filterOpen"
+              :filters="transactionFilters"
+              :options="options"
+              @close="filterOpen = false"
+              @apply="applyFilters"
+            />
           </div>
-          <InventoryStockFilters
-            v-if="filterOpen"
-            :filters="transactionFilters"
-            :options="options"
-            :panel-style="filterPanelStyle"
-            :trigger-element="filterButton"
-            @close="filterOpen = false"
-            @apply="applyFilters"
-          />
         </template>
 
         <template #thead>

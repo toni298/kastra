@@ -24,13 +24,12 @@ const props = defineProps({
   filters: { type: Object, default: () => ({}) },
   options: { type: Object, default: () => ({ warehouses: [], branches: [] }) },
   loading: { type: Boolean, default: false },
-  loadingMore: { type: Boolean, default: false },
   canCreate: { type: Boolean, default: false },
   canEdit: { type: Boolean, default: false },
   canDelete: { type: Boolean, default: false },
   canProcess: { type: Boolean, default: false },
 })
-const emit = defineEmits(['action', 'request', 'load-more'])
+const emit = defineEmits(['action', 'request', 'navigate'])
 const search = ref(props.filters.search ?? '')
 const filterOpen = ref(false)
 const filterButton = ref(null)
@@ -59,7 +58,12 @@ const filter = ({ search: value }) => {
   search.value = value
   request()
 }
-const loadMore = (url) => emit('load-more', url)
+const navigate = ({ cursor }) => {
+  if (!cursor) return
+  const url = new URL(route('inventory.opnames'), window.location.origin)
+  url.searchParams.set('cursor', cursor)
+  emit('request', { tab: 'opname', url: url.toString(), replace: true })
+}
 const changePerPage = (perPage) => request(perPage)
 const applyFilters = (filters) => {
   opnameFilters.value = filters
@@ -146,9 +150,6 @@ onBeforeUnmount(() => document.removeEventListener('keydown', closeMenuOnEscape)
         :pagination="pagination"
         :per-page="Number(pagination?.meta?.per_page ?? 10)"
         :loading="loading"
-        :loading-more="loadingMore"
-        infinite
-        require-scroll-for-load-more
         sticky-toolbar
         searchable
         :search="search"
@@ -158,7 +159,7 @@ onBeforeUnmount(() => document.removeEventListener('keydown', closeMenuOnEscape)
         empty-message="Stock opname tidak ditemukan."
         @filter="filter"
         @per-page-change="changePerPage"
-        @load-more="loadMore"
+        @navigate="navigate"
       >
         <template #filters
           ><div ref="filterButton">

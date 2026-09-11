@@ -169,7 +169,8 @@ const visibleSections = computed(() =>
     .filter((section) => section.items.length > 0)
 )
 const canViewMasterData = computed(
-  () => canViewProducts.value || can('suppliers.view') || can('users.view')
+  () =>
+    canViewProducts.value || can('suppliers.view') || can('users.view') || can('hr.employees.view')
 )
 
 const baseClasses =
@@ -248,6 +249,13 @@ const parentClasses = (active) => [baseClasses, active ? activeClasses : inactiv
           :class="linkClasses({ route: 'users.index', activePattern: 'users.*' })"
           @click="emit('close')"
           ><Users :size="18" />Pengguna</Link
+        >
+        <Link
+          v-if="can('hr.employees.view')"
+          :href="route('hr.employees.index')"
+          :class="linkClasses({ route: 'hr.employees.index', activePattern: 'hr.*' })"
+          @click="emit('close')"
+          ><Users :size="18" />SDM / HR</Link
         >
       </section>
 

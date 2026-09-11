@@ -58,6 +58,12 @@ class PermissionGroupSeeder extends Seeder
             'permissions' => ['users.view', 'users.create', 'users.edit', 'users.delete'],
         ],
         [
+            'group' => 'SDM / HR',
+            'subgroup' => 'Karyawan',
+            'sort' => 1,
+            'permissions' => ['hr.employees.view', 'hr.employees.create', 'hr.employees.edit', 'hr.employees.delete'],
+        ],
+        [
             'group' => 'Persediaan',
             'subgroup' => 'Ringkasan',
             'sort' => 1,

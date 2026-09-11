@@ -2,6 +2,8 @@
 import { Head, router, usePage } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 import { ShoppingCart } from 'lucide-vue-next'
+import Button from '@/Components/UI/Button.vue'
+import Modal from '@/Components/UI/Modal.vue'
 import PageHeader from '@/Components/UI/PageHeader.vue'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import SalesTabHeader from '../Components/SalesTabHeader.vue'
@@ -68,6 +70,7 @@ const selectedTransaction = ref(null)
 const detailLoading = ref(false)
 const detailError = ref(null)
 const modal = ref(null)
+const deleteTarget = ref(null)
 const tableLoading = ref(false)
 
 const requestTransactions = ({ url, data }) => {
@@ -105,18 +108,11 @@ const handleAction = async ({ action, item = null }) => {
     modal.value = 'create'
     return
   }
-  if (action === 'transaction-print') {
-    window.print()
+  if (action === 'transaction-delete') {
+    deleteTarget.value = item
     return
   }
-  if (
-    [
-      'transaction-detail',
-      'transaction-edit',
-      'transaction-payment',
-      'transaction-return',
-    ].includes(action)
-  ) {
+  if (['transaction-detail', 'transaction-edit'].includes(action)) {
     await loadDetail(item)
     if (action === 'transaction-detail') return
     modal.value = action.replace('transaction-', '')
@@ -125,6 +121,17 @@ const handleAction = async ({ action, item = null }) => {
 
 const closeModal = () => {
   modal.value = null
+}
+
+const confirmDelete = () => {
+  if (!deleteTarget.value) return
+
+  const transactionId = deleteTarget.value.id
+  deleteTarget.value = null
+  router.delete(route('sales.transactions.destroy', transactionId), {
+    preserveScroll: true,
+    onSuccess: () => refreshTransactions(),
+  })
 }
 
 const refreshTransactions = () => {
@@ -191,6 +198,7 @@ const closeDetail = () => {
       @close="closeDetail"
       @payment="modal = 'payment'"
       @return="modal = 'return'"
+      @finalize="handleAction({ action: 'transaction-finalize', item: selectedTransaction })"
       @completed="onDeliveryCompleted"
     />
     <SalesTransactionModal
@@ -212,5 +220,22 @@ const closeDetail = () => {
       @close="closeModal"
       @saved="onReturnSaved"
     />
+    <Modal
+      :model-value="Boolean(deleteTarget)"
+      title="Hapus transaksi?"
+      description="Draft transaksi akan dibatalkan dan tidak dapat digunakan kembali."
+      size="sm"
+      @update:model-value="deleteTarget = null"
+    >
+      <p class="text-sm leading-6 text-slate-600 dark:text-slate-300">
+        Transaksi
+        <strong class="font-mono text-slate-900 dark:text-white">{{ deleteTarget?.number }}</strong>
+        akan dihapus. Tindakan ini tidak dapat dibatalkan.
+      </p>
+      <template #footer>
+        <Button variant="secondary" @click="deleteTarget = null">Batal</Button>
+        <Button variant="danger" @click="confirmDelete">Hapus Transaksi</Button>
+      </template>
+    </Modal>
   </AuthenticatedLayout>
 </template>

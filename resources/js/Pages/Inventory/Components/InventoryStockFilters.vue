@@ -1,36 +1,25 @@
 <script setup>
-import { onBeforeUnmount, onMounted, reactive, ref } from 'vue'
+import { reactive } from 'vue'
 import { RotateCcw, SlidersHorizontal, X } from 'lucide-vue-next'
 import Button from '@/Components/UI/Button.vue'
 
 const props = defineProps({
   filters: { type: Object, default: () => ({}) },
   options: { type: Object, default: () => ({ warehouses: [], categories: [] }) },
-  panelStyle: { type: Object, default: () => ({}) },
-  triggerElement: { type: Object, default: null },
 })
 const emit = defineEmits(['close', 'apply'])
-const panelElement = ref(null)
 const form = reactive({
   gudang_id: props.filters.gudang_id ?? '',
   category_id: props.filters.category_id ?? '',
   status: props.filters.status ?? '',
 })
 const reset = () => Object.assign(form, { gudang_id: '', category_id: '', status: '' })
-const handleOutsidePointerDown = (event) => {
-  if (panelElement.value?.contains(event.target) || props.triggerElement?.contains(event.target))
-    return
-  emit('close')
-}
-onMounted(() => document.addEventListener('pointerdown', handleOutsidePointerDown, true))
-onBeforeUnmount(() => document.removeEventListener('pointerdown', handleOutsidePointerDown, true))
 </script>
 <template>
-  <Teleport to="body">
+  <div class="contents">
     <div
-      ref="panelElement"
-      class="fixed z-[120] w-[min(92vw,440px)] rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-[#29476b] dark:bg-[#102542]"
-      :style="panelStyle"
+      class="absolute top-full left-0 z-50 mt-2 max-w-[calc(100vw-2rem)] w-[min(92vw,440px)] rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl sm:left-auto sm:-right-12 dark:border-[#29476b] dark:bg-[#102542]"
+      @click.stop
     >
       <div class="flex items-start justify-between gap-4">
         <div>
@@ -88,5 +77,6 @@ onBeforeUnmount(() => document.removeEventListener('pointerdown', handleOutsideP
         >
       </div>
     </div>
-  </Teleport>
+    <div class="fixed inset-0 z-40" aria-hidden="true" @click="emit('close')"></div>
+  </div>
 </template>

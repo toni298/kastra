@@ -13,7 +13,9 @@ import axios from 'axios'
 window.axios = axios
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
+const configuredAppName = import.meta.env.VITE_APP_NAME?.trim()
+const appName =
+  configuredAppName && !/^\$\{[^}]+\}$/.test(configuredAppName) ? configuredAppName : 'Kastra ERP'
 
 createInertiaApp({
   title: (title) => `${title} - ${appName}`,

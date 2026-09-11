@@ -1,6 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
-import { router } from '@inertiajs/vue3'
+import { computed } from 'vue'
 import { Package } from '@lucide/vue'
 import PageHeader from '@/Components/UI/PageHeader.vue'
 import ProductDeleteModal from './ProductDeleteModal.vue'
@@ -44,83 +43,6 @@ const {
   handleMutation,
 } = useProductTabs(props)
 
-const pendingMoreCategories = ref(false)
-const loadingMoreCategories = ref(false)
-const accumulatedCategories = ref([])
-const pendingMoreBrands = ref(false)
-const loadingMoreBrands = ref(false)
-const accumulatedBrands = ref([])
-const pendingMoreUnits = ref(false)
-const loadingMoreUnits = ref(false)
-const accumulatedUnits = ref([])
-const displayedCategories = computed(() => ({
-  ...(props.product_categories ?? { data: [] }),
-  data: accumulatedCategories.value,
-}))
-const displayedBrands = computed(() => ({
-  ...(props.product_brands ?? { data: [] }),
-  data: accumulatedBrands.value,
-}))
-const displayedUnits = computed(() => ({
-  ...(props.units ?? { data: [] }),
-  data: accumulatedUnits.value,
-}))
-
-const loadMore = (key, url, loading, pending, accumulated) => {
-  if (!url || loading.value || props.loading) return
-  pending.value = true
-  loading.value = true
-  router.get(
-    url,
-    {},
-    {
-      only: [key],
-      preserveScroll: true,
-      preserveState: true,
-      onFinish: () => {
-        loading.value = false
-        pending.value = false
-      },
-    }
-  )
-}
-const loadMoreCategories = (url) =>
-  loadMore(
-    'product_categories',
-    url,
-    loadingMoreCategories,
-    pendingMoreCategories,
-    accumulatedCategories
-  )
-const loadMoreBrands = (url) =>
-  loadMore('product_brands', url, loadingMoreBrands, pendingMoreBrands, accumulatedBrands)
-const loadMoreUnits = (url) =>
-  loadMore('units', url, loadingMoreUnits, pendingMoreUnits, accumulatedUnits)
-const mergeItems = (items, pending, accumulated) => {
-  const data = items?.data ?? []
-  if (pending.value) {
-    pending.value = false
-    const ids = new Set(accumulated.value.map((item) => item.id))
-    accumulated.value.push(...data.filter((item) => !ids.has(item.id)))
-    return
-  }
-  accumulated.value = data.slice()
-}
-watch(
-  () => props.product_categories,
-  (items) => mergeItems(items, pendingMoreCategories, accumulatedCategories),
-  { immediate: true }
-)
-watch(
-  () => props.product_brands,
-  (items) => mergeItems(items, pendingMoreBrands, accumulatedBrands),
-  { immediate: true }
-)
-watch(
-  () => props.units,
-  (items) => mergeItems(items, pendingMoreUnits, accumulatedUnits),
-  { immediate: true }
-)
 </script>
 
 <template>
@@ -169,33 +91,27 @@ watch(
     />
     <CategoryTab
       v-else-if="activeTab === 'product_categories'"
-      :items="displayedCategories"
+      :items="props.product_categories"
       :filters="filters"
       :loading="loading"
-      :loading-more="loadingMoreCategories"
       @request="handleRequest"
       @mutated="handleMutation"
-      @load-more="loadMoreCategories"
     />
     <BrandTab
       v-else-if="activeTab === 'product_brands'"
-      :items="displayedBrands"
+      :items="props.product_brands"
       :filters="filters"
       :loading="loading"
-      :loading-more="loadingMoreBrands"
       @request="handleRequest"
       @mutated="handleMutation"
-      @load-more="loadMoreBrands"
     />
     <UnitTab
       v-else
-      :items="displayedUnits"
+      :items="props.units"
       :filters="filters"
       :loading="loading"
-      :loading-more="loadingMoreUnits"
       @request="handleRequest"
       @mutated="handleMutation"
-      @load-more="loadMoreUnits"
     />
 
     <ProductFormModal

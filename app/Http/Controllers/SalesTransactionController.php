@@ -154,9 +154,10 @@ class SalesTransactionController extends Controller
         // Get company from context
         $company = $this->companyContext->current();
 
-        return back()
-            ->with('success', 'Transaksi penjualan berhasil disimpan.')
-            ->with('invoiceData', [
+        $response = back()->with('success', 'Transaksi penjualan berhasil disimpan.');
+
+        if (($request->validated()['status'] ?? 'completed') !== 'draft') {
+            $response->with('invoiceData', [
                 'transaction' => [
                     'id' => $transaction->id,
                     'transaction_number' => $transaction->transaction_number,
@@ -201,6 +202,9 @@ class SalesTransactionController extends Controller
                     'name' => $company->name,
                 ] : null,
             ]);
+        }
+
+        return $response;
     }
     public function show(SalesTransaction $transaction): JsonResponse
     {
@@ -225,6 +229,14 @@ class SalesTransactionController extends Controller
         Gate::authorize('delete', $transaction);
         $this->service->delete($transaction->load('details'));
         return back()->with('success', 'Transaksi penjualan dibatalkan.');
+    }
+
+    public function finalize(SalesTransaction $transaction): RedirectResponse
+    {
+        Gate::authorize('finalize', $transaction);
+        $this->service->finalize($transaction, (string) request()->user()->id);
+
+        return back()->with('success', 'Transaksi berhasil difinalisasi dan dikunci.');
     }
     public function payment(StoreSalesPaymentRequest $request, SalesTransaction $transaction): RedirectResponse
     {

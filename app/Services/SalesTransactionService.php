@@ -79,6 +79,31 @@ class SalesTransactionService
         });
     }
 
+    public function finalize(SalesTransaction $transaction, string $userId): SalesTransaction
+    {
+        return DB::transaction(function () use ($transaction, $userId) {
+            $transaction = SalesTransaction::query()
+                ->whereKey($transaction->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($transaction->finalized_at !== null) {
+                throw ValidationException::withMessages(['transaction' => 'Transaksi sudah difinalisasi.']);
+            }
+
+            if ($transaction->status !== 'completed' || $transaction->payment_status !== 'paid') {
+                throw ValidationException::withMessages(['transaction' => 'Transaksi harus berstatus selesai dan lunas sebelum difinalisasi.']);
+            }
+
+            $transaction->forceFill([
+                'finalized_at' => now(),
+                'finalized_by' => $userId,
+            ])->save();
+
+            return $transaction->fresh(['finalizedBy']);
+        });
+    }
+
     public function update(SalesTransaction $transaction, array $data): SalesTransaction
     {
         return DB::transaction(function () use ($transaction, $data) {

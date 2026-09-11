@@ -277,7 +277,10 @@ class RbacService
             'coa.delete',
         ],
         'hr' => [
-            // Belum ada permission HR di catalog — placeholder untuk pengembangan selanjutnya
+            'hr.employees.view',
+            'hr.employees.create',
+            'hr.employees.edit',
+            'hr.employees.delete',
         ],
         'report' => [
             'laporan.view',
@@ -364,7 +367,7 @@ class RbacService
             ['id' => 'warehouse', 'name' => 'Gudang', 'description' => 'Multi gudang, transfer antar gudang, dan tracking stok.', 'icon' => 'Warehouse', 'enabled' => true],
             ['id' => 'finance', 'name' => 'Keuangan', 'description' => 'Kas, bank, transfer dana, dan akuntansi.', 'icon' => 'Landmark', 'enabled' => true],
             ['id' => 'report', 'name' => 'Laporan & Analitik', 'description' => 'Laporan penjualan, pembelian, stok, dan keuangan.', 'icon' => 'ChartNoAxesColumn', 'enabled' => true],
-            ['id' => 'hr', 'name' => 'SDM / HR', 'description' => 'Karyawan, absensi, dan penggajian.', 'icon' => 'Users', 'enabled' => false],
+            ['id' => 'hr', 'name' => 'SDM / HR', 'description' => 'Karyawan, absensi, dan penggajian.', 'icon' => 'Users', 'enabled' => true],
             ['id' => 'ecommerce', 'name' => 'E-Commerce', 'description' => 'Toko online, katalog produk, dan pesanan online.', 'icon' => 'Globe', 'enabled' => true],
             ['id' => 'crm', 'name' => 'CRM', 'description' => 'Manajemen pelanggan dan follow up.', 'icon' => 'Handshake', 'enabled' => false],
         ];
@@ -418,16 +421,16 @@ class RbacService
 
     /**
      * Gabungkan CORE_PERMISSIONS + permission dari fitur yang dipilih.
-     * Fitur tidak dikenal diabaikan. Jika tidak ada fitur valid → semua permission (fallback perilaku lama).
+     * Fitur null mempertahankan fallback legacy, sedangkan array kosong berarti
+     * semua fitur opsional dimatikan dan hanya permission inti yang aktif.
      */
     public function permissionsForFeatures(?array $features): array
     {
-        $features = array_values(array_filter($features ?? [], fn($f) => isset(self::FEATURE_PERMISSIONS[$f])));
-
-        if (empty($features)) {
+        if ($features === null) {
             return $this->permissionCatalog();
         }
 
+        $features = array_values(array_filter($features, fn($f) => isset(self::FEATURE_PERMISSIONS[$f])));
         $names = collect(self::CORE_PERMISSIONS);
         foreach ($features as $feature) {
             $names = $names->merge(self::FEATURE_PERMISSIONS[$feature]);
@@ -443,16 +446,16 @@ class RbacService
 
     /**
      * Permission read-only untuk role karyawan, difilter sesuai fitur terpilih.
-     * Jika tidak ada fitur → perilaku lama (semua permission read-only).
+     * Fitur null mempertahankan fallback legacy, sedangkan array kosong hanya
+     * menyisakan permission operasional inti yang memang ada di role karyawan.
      */
     public function karyawanPermissionsForFeatures(?array $features): array
     {
-        $features = array_values(array_filter($features ?? [], fn($f) => isset(self::FEATURE_PERMISSIONS[$f])));
-
-        if (empty($features)) {
+        if ($features === null) {
             return $this->karyawanPermissions();
         }
 
+        $features = array_values(array_filter($features, fn($f) => isset(self::FEATURE_PERMISSIONS[$f])));
         $allowed = collect($this->permissionsForFeatures($features));
 
         return collect($this->karyawanPermissions())
@@ -484,6 +487,10 @@ class RbacService
             'users.create',
             'users.edit',
             'users.delete',
+            'hr.employees.view',
+            'hr.employees.create',
+            'hr.employees.edit',
+            'hr.employees.delete',
             'company.view',
             'company.edit',
             'company.settings',

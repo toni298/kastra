@@ -22,6 +22,7 @@ use App\Models\SalesReturn;
 use App\Models\Customer;
 use App\Models\CashBankAccountSetting;
 use App\Models\Reminder;
+use App\Models\Employee;
 use App\Policies\ReminderPolicy;
 use App\Policies\ProductBrandPolicy;
 use App\Policies\ProductCategoryPolicy;
@@ -48,6 +49,7 @@ use App\Policies\OutletPolicy;
 use App\Policies\PermissionPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\UserPolicy;
+use App\Policies\EmployeePolicy;
 use App\Services\CompanyContext;
 use App\Services\InertiaAuthorizationService;
 use Illuminate\Support\Facades\Gate;
@@ -61,14 +63,14 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(
             CompanyContext::class,
-            fn (): CompanyContext => new CompanyContext(),
+            fn(): CompanyContext => new CompanyContext(),
         );
         $this->app->scoped(InertiaAuthorizationService::class);
     }
 
     public function boot(): void
     {
-        if (config('app.env') === 'production' || request()->header('x-forwarded-proto') === 'https') {
+        if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }
         Gate::policy(User::class, UserPolicy::class);
@@ -94,6 +96,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Customer::class, CustomerPolicy::class);
         Gate::policy(CashBankAccountSetting::class, CashBankAccountSettingPolicy::class);
         Gate::policy(Reminder::class, ReminderPolicy::class);
+        Gate::policy(Employee::class, EmployeePolicy::class);
 
         Vite::prefetch(concurrency: 3);
     }

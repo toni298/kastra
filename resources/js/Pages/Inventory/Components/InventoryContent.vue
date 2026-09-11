@@ -40,7 +40,6 @@ const {
   activeComponentProps,
   selectTab,
   requestActiveTab,
-  loadMore,
   openAction,
   closeModal,
 } = useInventoryTabs(props)
@@ -82,10 +81,6 @@ const InventoryTransferReceiveModal = defineAsyncComponent(
   () => import('./InventoryTransferReceiveModal.vue')
 )
 const activeComponent = computed(() => components[currentTab.value])
-const selectTabById = (id) => {
-  const tab = tabs.value.find((item) => item.id === id)
-  if (tab) selectTab(tab)
-}
 const saved = () => closeModal()
 </script>
 
@@ -130,8 +125,6 @@ const saved = () => closeModal()
         :key="currentTab"
         v-bind="activeComponentProps"
         @request="requestActiveTab"
-        @load-more="loadMore"
-        @navigate="selectTabById"
         @create="openAction({ action: 'create', type: 'stock' })"
         @edit="openAction({ action: 'edit', type: 'stock', item: $event })"
         @delete="openAction({ action: 'delete', type: 'stock', item: $event })"

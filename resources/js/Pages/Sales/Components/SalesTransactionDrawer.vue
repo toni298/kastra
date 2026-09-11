@@ -14,7 +14,7 @@ const props = defineProps({
   error: { type: String, default: null },
   hideActions: { type: Boolean, default: false },
 })
-const emit = defineEmits(['close', 'payment', 'return', 'completed'])
+const emit = defineEmits(['close', 'payment', 'return', 'completed', 'finalize'])
 const { props: pageProps } = usePage()
 const completeConfirm = ref(false)
 const processingComplete = ref(false)
@@ -102,7 +102,17 @@ const transaction = computed(() => {
   }
 })
 const canCompleteDelivery = computed(
-  () => transaction.value.paymentStatus === 'paid' && transaction.value.status !== 'Completed'
+  () =>
+    props.transaction.status === 'pending' &&
+    transaction.value.paymentStatus === 'paid' &&
+    !props.transaction.finalized_at
+)
+const canFinalize = computed(
+  () =>
+    props.transaction.status === 'completed' &&
+    props.transaction.payment_status === 'paid' &&
+    !props.transaction.finalized_at &&
+    can('penjualan.transactions.edit')
 )
 const printInvoice = () => {
   const detailsData = (props.transaction.details ?? []).map((item) => ({
@@ -316,8 +326,9 @@ const paymentBadge = (value) =>
           <button
             v-if="
               can('penjualan.transactions.return') &&
-              (transaction.status === 'Completed' || transaction.status === 'Retur Sebagian') &&
-              transaction.payment === 'Lunas'
+              props.transaction.status === 'completed' &&
+              transaction.payment === 'Lunas' &&
+              !props.transaction.finalized_at
             "
             type="button"
             class="inline-flex h-10 items-center gap-2 rounded-xl border border-orange-300 px-4 text-sm font-semibold text-orange-700 hover:bg-orange-50 dark:border-orange-400/40 dark:text-orange-300 dark:hover:bg-orange-400/10"
@@ -327,7 +338,9 @@ const paymentBadge = (value) =>
           ><button
             v-if="
               can('penjualan.transactions.payment') &&
+              ['pending', 'completed', 'partial_return'].includes(props.transaction.status) &&
               transaction.payment !== 'Lunas' &&
+              !props.transaction.finalized_at &&
               transaction.status !== 'Void' &&
               transaction.status !== 'Retur Penuh'
             "
@@ -343,6 +356,14 @@ const paymentBadge = (value) =>
             @click="completeConfirm = true"
           >
             <CheckCircle2 :size="16" />Selesaikan Pengiriman
+          </button>
+          <button
+            v-if="canFinalize"
+            type="button"
+            class="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-700"
+            @click="emit('finalize', transaction)"
+          >
+            <CheckCircle2 :size="16" />Selesaikan Transaksi
           </button>
           <button
             v-if="can('penjualan.transactions.print')"

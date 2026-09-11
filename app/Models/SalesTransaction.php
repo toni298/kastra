@@ -29,6 +29,8 @@ class SalesTransaction extends Model
         'transaction_date',
         'due_date',
         'status',
+        'finalized_at',
+        'finalized_by',
         'payment_status',
         'discount',
         'tax',
@@ -38,6 +40,7 @@ class SalesTransaction extends Model
     protected $casts = [
         'transaction_date' => 'date',
         'due_date' => 'date',
+        'finalized_at' => 'datetime',
         'discount' => 'integer',
         'tax' => 'integer',
         'shipping_cost' => 'integer',
@@ -48,6 +51,7 @@ class SalesTransaction extends Model
     public function branch(): BelongsTo { return $this->belongsTo(Branch::class); }
     public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
     public function creator(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
+    public function finalizedBy(): BelongsTo { return $this->belongsTo(User::class, 'finalized_by'); }
     public function details(): HasMany { return $this->hasMany(SalesTransactionDetail::class); }
     public function payment(): \Illuminate\Database\Eloquent\Relations\HasOne
     {

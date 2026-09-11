@@ -16,10 +16,16 @@ export const usePaginationContract = (paginationRef) => {
     )
   )
   const resolvedNextCursor = computed(
-    () => paginationRef.value?.meta?.next_cursor ?? paginationRef.value?.next_cursor ?? null
+    () =>
+      paginationRef.value?.meta?.next_cursor ??
+      paginationRef.value?.next_cursor ??
+      cursorFromUrl(resolvedNextUrl.value)
   )
   const resolvedPrevCursor = computed(
-    () => paginationRef.value?.meta?.prev_cursor ?? paginationRef.value?.prev_cursor ?? null
+    () =>
+      paginationRef.value?.meta?.prev_cursor ??
+      paginationRef.value?.prev_cursor ??
+      cursorFromUrl(resolvedPrevUrl.value)
   )
   const hasCursorPagination = computed(() =>
     Boolean(resolvedNextCursor.value || resolvedPrevCursor.value)
@@ -41,5 +47,15 @@ export const usePaginationContract = (paginationRef) => {
     resolvedNextCursor,
     resolvedPrevCursor,
     hasCursorPagination,
+  }
+}
+
+const cursorFromUrl = (url) => {
+  if (!url) return null
+
+  try {
+    return new URL(url, window.location.origin).searchParams.get('cursor')
+  } catch {
+    return null
   }
 }

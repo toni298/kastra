@@ -27,7 +27,7 @@ class InventoryMovementController extends Controller
    public function index(IndexStockMovementRequest $request): JsonResponse
    {
       $query = $this->baseQuery($request);
-      $movements = $query->latest('created_at')->latest('id')->paginate($request->validated('per_page', 25));
+      $movements = $query->latest('created_at')->latest('id')->cursorPaginate($request->validated('per_page', 25))->withQueryString();
       $summary = $this->summary($request);
 
       return StockMovementResource::collection($movements)->additional(['summary' => $summary])->response();
@@ -39,7 +39,7 @@ class InventoryMovementController extends Controller
          'activeTab' => 'movements',
          'enabledFeatures' => $this->companyContext->current()?->features ?? [],
          'movementItems' => fn() => StockMovementResource::collection(
-            $this->baseQuery($request)->latest('created_at')->latest('id')->paginate($request->validated('per_page', 25))
+            $this->baseQuery($request)->latest('created_at')->latest('id')->cursorPaginate($request->validated('per_page', 25))->withQueryString()
          )->additional(['summary' => $this->summary($request)]),
          'movementFilters' => $request->validated(),
          'movementSummary' => fn() => $this->summary($request),

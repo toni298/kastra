@@ -55,6 +55,14 @@ class MenuService
                'icon' => 'Users',
                'permission' => 'users.view',
             ],
+            [
+               'id' => 'hr',
+               'label' => 'SDM / HR',
+               'route' => 'hr.employees.index',
+               'icon' => 'UsersRound',
+               'permission' => 'hr.employees.view',
+               'activePattern' => ['hr.*'],
+            ],
          ],
       ],
       [

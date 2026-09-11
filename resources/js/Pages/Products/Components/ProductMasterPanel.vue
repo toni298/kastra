@@ -18,10 +18,9 @@ const props = defineProps({
   items: { type: Object, required: true },
   filters: { type: Object, default: () => ({}) },
   loading: { type: Boolean, default: false },
-  loadingMore: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['request', 'form', 'detail', 'delete', 'mutated', 'load-more'])
+const emit = defineEmits(['request', 'form', 'detail', 'delete', 'mutated'])
 
 const { can: canPermission } = useAuthorization()
 
@@ -157,9 +156,6 @@ const handleMutation = () => {
         :pagination="items"
         :per-page="items.per_page ?? 10"
         :loading="loading"
-        :loading-more="loadingMore"
-        :infinite="['product_categories', 'product_brands', 'units'].includes(master)"
-        require-scroll-for-load-more
         searchable
         :search="search"
         :sort-key="sortKey"
@@ -172,7 +168,6 @@ const handleMutation = () => {
         @navigate="navigate"
         @per-page-change="applyFilters"
         @sort="handleSort"
-        @load-more="emit('load-more', $event)"
       >
         <template v-if="config.filter" #filters>
           <SelectInput v-model="status" aria-label="Filter status">

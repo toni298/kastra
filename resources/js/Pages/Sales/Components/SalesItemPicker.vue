@@ -1,7 +1,7 @@
 <script setup>
 import axios from 'axios'
 import { computed, ref, watch } from 'vue'
-import { Package, Plus, Search, Wrench } from 'lucide-vue-next'
+import { LoaderCircle, Package, Plus, Search, Wrench } from 'lucide-vue-next'
 import Badge from '@/Components/UI/Badge.vue'
 import Button from '@/Components/UI/Button.vue'
 const props = defineProps({ branchId: { type: String, default: '' } })
@@ -70,6 +70,15 @@ const money = (value) =>
         class="w-full rounded-2xl border-slate-200 py-3.5 pl-12 pr-4 text-sm shadow-sm dark:border-[#29476b] dark:bg-[#0a1b33] dark:text-white"
         placeholder="Cari produk, jasa, SKU, atau scan barcode..."
     /></label>
+    <div
+      v-if="loading"
+      class="mt-4 flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-400/10 dark:text-emerald-300"
+      role="status"
+      aria-live="polite"
+    >
+      <LoaderCircle :size="17" class="shrink-0 animate-spin" aria-hidden="true" />
+      <span>Memuat data produk...</span>
+    </div>
     <div class="mt-4 grid gap-3 sm:grid-cols-2">
       <article
         v-for="item in results"
@@ -103,7 +112,7 @@ const money = (value) =>
       </article>
     </div>
     <p v-if="error" class="py-6 text-center text-sm text-red-500">{{ error }}</p>
-    <p v-else-if="!results.length" class="py-10 text-center text-sm text-slate-500">
+    <p v-else-if="!loading && !results.length" class="py-10 text-center text-sm text-slate-500">
       {{ props.branchId ? 'Tidak ada produk ditemukan.' : 'Pilih cabang terlebih dahulu.' }}
     </p>
   </section>

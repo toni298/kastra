@@ -6,7 +6,9 @@ import { createSSRApp, h } from 'vue'
 import { MotionPlugin } from '@vueuse/motion'
 import { ZiggyVue } from 'ziggy-js'
 
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel'
+const configuredAppName = import.meta.env.VITE_APP_NAME?.trim()
+const appName =
+  configuredAppName && !/^\$\{[^}]+\}$/.test(configuredAppName) ? configuredAppName : 'Kastra ERP'
 
 const pages = import.meta.glob('./Pages/**/*.vue')
 

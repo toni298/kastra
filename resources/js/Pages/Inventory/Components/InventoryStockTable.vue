@@ -8,7 +8,7 @@ import DataTableSortHeader from '@/Components/UI/DataTableSortHeader.vue'
 import IconButton from '@/Components/UI/IconButton.vue'
 import InventoryStockFilters from './InventoryStockFilters.vue'
 import { Filter } from '@lucide/vue'
-import { nextTick, ref, computed } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
   items: { type: Object, required: true },
@@ -20,10 +20,9 @@ const props = defineProps({
   canEdit: { type: Boolean, default: false },
   canDelete: { type: Boolean, default: false },
   loading: { type: Boolean, default: false },
-  loadingMore: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['request', 'load-more', 'create', 'edit', 'delete'])
+const emit = defineEmits(['request', 'navigate', 'create', 'edit', 'delete'])
 const search = ref(props.filters.search ?? '')
 const filters = ref({
   gudang_id: props.filters.gudang_id ?? '',
@@ -32,7 +31,6 @@ const filters = ref({
 })
 const filterOpen = ref(false)
 const filterButton = ref(null)
-const filterPanelStyle = ref({})
 const sortKey = ref(typeof props.filters.sort === 'string' ? props.filters.sort : 'created_at')
 const sortDirection = ref(
   ['asc', 'desc'].includes(props.filters.sort_direction) ? props.filters.sort_direction : 'desc'
@@ -62,26 +60,20 @@ const applyFilters = (value) => {
   filterOpen.value = false
   request()
 }
-const toggleFilter = async () => {
+const toggleFilter = () => {
   filterOpen.value = !filterOpen.value
-  if (!filterOpen.value) return
-
-  await nextTick()
-  const rect = filterButton.value?.getBoundingClientRect()
-  if (!rect) return
-
-  const width = Math.min(440, window.innerWidth - 24)
-  filterPanelStyle.value = {
-    left: `${Math.max(12, Math.min(rect.left, window.innerWidth - width - 12))}px`,
-    top: `${Math.min(rect.bottom + 8, window.innerHeight - 24)}px`,
-  }
 }
 const handleSort = ({ key, direction }) => {
   sortKey.value = key
   sortDirection.value = direction
   request()
 }
-const loadMore = (url) => emit('load-more', url)
+const navigate = ({ cursor }) => {
+  if (!cursor) return
+  const url = new URL(route('inventory.stock'), window.location.origin)
+  url.searchParams.set('cursor', cursor)
+  emit('request', { tab: 'stock', url: url.toString(), replace: true })
+}
 </script>
 
 <template>
@@ -103,9 +95,6 @@ const loadMore = (url) => emit('load-more', url)
         :pagination="pagination"
         :per-page="Number(pagination?.meta?.per_page ?? 10)"
         :loading="loading"
-        :loading-more="loadingMore"
-        infinite
-        require-scroll-for-load-more
         sticky-toolbar
         searchable
         :search="search"
@@ -116,26 +105,24 @@ const loadMore = (url) => emit('load-more', url)
         empty-icon="package"
         empty-title="Tidak ada data"
         empty-message="Stok produk tidak ditemukan."
-        @load-more="loadMore"
+        @navigate="navigate"
         @filter="handleSearch"
         @per-page-change="request"
         @sort="handleSort"
       >
         <template #filters>
-          <div ref="filterButton" class="flex w-full flex-wrap gap-2 sm:w-auto">
+          <div ref="filterButton" class="relative inline-block">
             <Button variant="secondary" size="sm" @click="toggleFilter"
               ><Filter :size="16" class="mr-2" />Filter</Button
             >
+            <InventoryStockFilters
+              v-if="filterOpen"
+              :filters="filters"
+              :options="options"
+              @close="filterOpen = false"
+              @apply="applyFilters"
+            />
           </div>
-          <InventoryStockFilters
-            v-if="filterOpen"
-            :filters="filters"
-            :options="options"
-            :panel-style="filterPanelStyle"
-            :trigger-element="filterButton"
-            @close="filterOpen = false"
-            @apply="applyFilters"
-          />
         </template>
 
         <template #thead="{ sort, sortKey: activeSort, sortDirection: direction }">
