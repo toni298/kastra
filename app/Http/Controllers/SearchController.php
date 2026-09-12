@@ -9,11 +9,13 @@ use App\Http\Requests\Search\SearchGudangRequest;
 use App\Http\Requests\Search\SearchBranchProductRequest;
 use App\Http\Requests\Search\SearchCustomerRequest;
 use App\Http\Requests\Search\SearchSupplierRequest;
+use App\Http\Requests\Search\SearchEmployeeRequest;
 use App\Http\Requests\Search\SearchPurchaseProductRequest;
 use App\Repositories\SalesTransactionRepository;
 use App\Models\BranchProductStock;
 use App\Models\Branch;
 use App\Models\Supplier;
+use App\Models\Employee;
 use App\Repositories\CabangRepository;
 use App\Repositories\ProductMasterRepository;
 use App\Repositories\ProductStockRepository;
@@ -107,6 +109,21 @@ class SearchController extends Controller
         $filters = $request->validated();
         $page = Supplier::query()->select(['id', 'name'])->where('company_id', $this->companyId())->when($filters['search'] ?? null, fn($query, $search) => $query->where(fn($q) => $q->where('name', 'like', "%{$search}%")->orWhere('contact_supplier', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%")))->orderBy('name')->cursorPaginate(20);
         return $this->response($page, fn(Model $supplier) => ['id' => $supplier->id, 'text' => $supplier->name]);
+    }
+
+    public function employees(SearchEmployeeRequest $request): JsonResponse
+    {
+        $filters = $request->validated();
+        $page = Employee::query()
+            ->select(['id', 'name', 'nik'])
+            ->where('company_id', $this->companyId())
+            ->where('status', 'active')
+            ->when($filters['search'] ?? null, fn ($query, $search) => $query->where(fn ($nested) => $nested->where('name', 'like', "%{$search}%")->orWhere('nik', 'like', "%{$search}%")))
+            ->orderBy('name')
+            ->orderBy('id')
+            ->cursorPaginate(10);
+
+        return $this->response($page, fn (Employee $employee) => ['id' => $employee->id, 'text' => "{$employee->name} ({$employee->nik})"]);
     }
 
     public function branchProducts(SearchBranchProductRequest $request): JsonResponse

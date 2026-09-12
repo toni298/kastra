@@ -9,7 +9,7 @@ use Inertia\Response;
 
 class HRAttendanceController extends Controller
 {
-   public function __invoke(Request $request): Response
+   public function index(Request $request): Response
    {
       return Inertia::render('HR/Index', ['activeTab' => 'attendance']);
    }

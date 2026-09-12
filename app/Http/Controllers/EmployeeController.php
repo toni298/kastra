@@ -29,6 +29,7 @@ class EmployeeController extends Controller
             $this->repository->paginate($this->companyId(), $request->validated())
          ),
          'branches' => $this->repository->branches($this->companyId()),
+         'shifts' => $this->repository->shifts($this->companyId()),
          'filters' => $request->validated(),
          'activeTab' => 'employees',
       ]);

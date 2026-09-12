@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Employee;
+use App\Models\Shift;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Support\Collection;
 
@@ -12,7 +13,7 @@ class EmployeeRepository
    {
       return Employee::query()
          ->where('company_id', $companyId)
-         ->with('branch:id,name')
+         ->with(['branch:id,name', 'shift:id,name,start_time,end_time'])
          ->when($filters['search'] ?? null, fn($query, $search) => $query->where(function ($nested) use ($search): void {
             $nested->where('name', 'like', "%{$search}%")
                ->orWhere('nik', 'like', "%{$search}%")
@@ -44,5 +45,10 @@ class EmployeeRepository
          ->where('company_id', $companyId)
          ->orderBy('name')
          ->get(['id', 'name']);
+   }
+
+   public function shifts(string $companyId): Collection
+   {
+      return Shift::query()->where('company_id', $companyId)->where('is_active', true)->orderBy('start_time')->get(['id', 'name', 'start_time', 'end_time']);
    }
 }

@@ -8,11 +8,13 @@ import Modal from '@/Components/UI/Modal.vue'
 const props = defineProps({
   employee: { type: Object, default: null },
   branches: { type: Array, default: () => [] },
+  shifts: { type: Array, default: () => [] },
 })
 const emit = defineEmits(['close'])
 const editing = computed(() => Boolean(props.employee))
 const form = useForm({
   branch_id: props.employee?.branch?.id ?? '',
+  shift_id: props.employee?.shift?.id ?? '',
   nik: props.employee?.nik ?? '',
   name: props.employee?.name ?? '',
   phone: props.employee?.phone ?? '',
@@ -64,6 +66,21 @@ const submit = () => {
             <option value="">Semua cabang</option>
             <option v-for="branch in branches" :key="branch.id" :value="branch.id">
               {{ branch.name }}
+            </option>
+          </select>
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200"
+            >Shift absensi</label
+          >
+          <select
+            v-model="form.shift_id"
+            class="w-full rounded-xl border-slate-300 py-3 text-sm dark:border-[#29476b] dark:bg-[#0a1b33] dark:text-white"
+          >
+            <option value="">Tanpa shift</option>
+            <option v-for="shift in shifts" :key="shift.id" :value="shift.id">
+              {{ shift.name }} ({{ shift.start_time?.slice(0, 5) }} -
+              {{ shift.end_time?.slice(0, 5) }})
             </option>
           </select>
         </div>

@@ -15,6 +15,7 @@ class Employee extends Model
    protected $fillable = [
       'company_id',
       'branch_id',
+      'shift_id',
       'nik',
       'name',
       'phone',
@@ -50,5 +51,15 @@ class Employee extends Model
    public function branch(): BelongsTo
    {
       return $this->belongsTo(Branch::class);
+   }
+
+   public function shift(): BelongsTo
+   {
+      return $this->belongsTo(Shift::class);
+   }
+
+   public function attendances(): \Illuminate\Database\Eloquent\Relations\HasMany
+   {
+      return $this->hasMany(Attendance::class);
    }
 }

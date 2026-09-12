@@ -14,6 +14,17 @@ class HrPermissionSeeder extends Seeder
       'hr.employees.create',
       'hr.employees.edit',
       'hr.employees.delete',
+      'hr.attendance.view',
+      'hr.attendance.edit',
+      'hr.attendance.clock',
+      'hr.shifts.manage',
+      'hr.commissions.view',
+      'hr.overtime.view',
+      'hr.overtime.create',
+      'hr.overtime.approve',
+      'hr.payroll.view',
+      'hr.payroll.generate',
+      'hr.payroll.post',
    ];
 
    public function run(RbacService $rbac): void

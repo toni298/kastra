@@ -7,7 +7,7 @@ import HRTabHeader from './Components/HRTabHeader.vue'
 import SummaryTab from './Tabs/SummaryTab.vue'
 import EmployeesTab from './Tabs/EmployeesTab.vue'
 import AttendanceTab from './Tabs/AttendanceTab.vue'
-import CommissionTab from './Tabs/CommissionTab.vue'
+import CommissionOvertimeTab from './Tabs/CommissionOvertimeTab.vue'
 import PayrollTab from './Tabs/PayrollTab.vue'
 
 defineProps({
@@ -16,6 +16,7 @@ defineProps({
   summary: { type: Object, default: () => ({}) },
   branches: { type: Array, default: () => [] },
   filters: { type: Object, default: () => ({}) },
+  shifts: { type: Array, default: () => [] },
 })
 </script>
 
@@ -36,10 +37,11 @@ defineProps({
         v-else-if="activeTab === 'employees'"
         :employees="employees"
         :branches="branches"
+        :shifts="shifts"
         :filters="filters"
       />
       <AttendanceTab v-else-if="activeTab === 'attendance'" />
-      <CommissionTab v-else-if="activeTab === 'commission'" />
+      <CommissionOvertimeTab v-else-if="activeTab === 'commission'" />
       <PayrollTab v-else />
     </div>
   </AuthenticatedLayout>

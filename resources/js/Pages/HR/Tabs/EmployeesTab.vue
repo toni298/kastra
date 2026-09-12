@@ -12,6 +12,7 @@ import ResetPinModal from '../Components/ResetPinModal.vue'
 const props = defineProps({
   employees: { type: Object, default: () => ({ data: [] }) },
   branches: { type: Array, default: () => [] },
+  shifts: { type: Array, default: () => [] },
   filters: { type: Object, default: () => ({}) },
   loading: { type: Boolean, default: false },
 })
@@ -93,6 +94,7 @@ const deleteEmployee = () =>
     v-if="formOpen"
     :employee="selected"
     :branches="branches"
+    :shifts="shifts"
     @close="formOpen = false"
   />
   <ResetPinModal v-if="pinOpen && selected" :employee="selected" @close="pinOpen = false" />

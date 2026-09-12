@@ -55,6 +55,7 @@ use App\Http\Controllers\Accounting\ShowAccountingSettingsController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\HR\HRAttendanceController;
+use App\Http\Controllers\KioskAttendanceController;
 use App\Http\Controllers\HR\HRCommissionController;
 use App\Http\Controllers\HR\HRPayrollController;
 use App\Http\Controllers\HR\HRSummaryController;
@@ -95,9 +96,13 @@ Route::middleware(['auth', 'verified', 'onboarded', 'company.context', 'cashier.
     Route::delete('users/{user}', [UserController::class, 'destroy'])->middleware('can:users.delete')->name('users.destroy');
     Route::get('hr/summary', HRSummaryController::class)->middleware('can:hr.employees.view')->name('hr.summary.index');
     Route::get('hr/employees', [EmployeeController::class, 'index'])->middleware('can:hr.employees.view')->name('hr.employees.index');
-    Route::get('hr/attendance', HRAttendanceController::class)->middleware('can:hr.employees.view')->name('hr.attendance.index');
-    Route::get('hr/commission', HRCommissionController::class)->middleware('can:hr.employees.view')->name('hr.commission.index');
-    Route::get('hr/payroll', HRPayrollController::class)->middleware('can:hr.employees.view')->name('hr.payroll.index');
+    Route::get('hr/attendance', [HRAttendanceController::class, 'index'])->middleware('can:hr.attendance.view')->name('hr.attendance.index');
+    Route::get('kiosk/attendance', [KioskAttendanceController::class, 'page'])->middleware('can:hr.attendance.clock')->name('kiosk.attendance');
+    Route::prefix('api/kiosk')->name('api.kiosk.')->group(function () {
+        Route::post('clock', [KioskAttendanceController::class, 'clock'])->middleware('can:hr.attendance.clock')->name('clock');
+    });
+    Route::get('hr/commission', HRCommissionController::class)->middleware('can:hr.commissions.view')->name('hr.commission.index');
+    Route::get('hr/payroll', HRPayrollController::class)->middleware('can:hr.payroll.view')->name('hr.payroll.index');
     Route::post('hr/employees', [EmployeeController::class, 'store'])->middleware('can:hr.employees.create')->name('hr.employees.store');
     Route::put('hr/employees/{employee}', [EmployeeController::class, 'update'])->middleware('can:hr.employees.edit')->name('hr.employees.update');
     Route::delete('hr/employees/{employee}', [EmployeeController::class, 'destroy'])->middleware('can:hr.employees.delete')->name('hr.employees.destroy');
@@ -325,6 +330,7 @@ Route::middleware(['auth', 'verified', 'onboarded', 'company.context', 'cashier.
     Route::get('search/products', [SearchController::class, 'products'])->name('search.products');
     Route::get('search/branch-products', [SearchController::class, 'branchProducts'])->name('search.branch-products');
     Route::get('search/customers', [SearchController::class, 'customers'])->name('search.customers');
+    Route::get('search/employees', [SearchController::class, 'employees'])->middleware('can:hr.overtime.create')->name('search.employees');
     Route::put('company/{company}', [CompanyController::class, 'update'])->middleware('can:company.edit')->name('company.update');
     Route::put('company/{company}/settings', [CompanyController::class, 'updateSettings'])->middleware('can:company.settings')->name('company.settings.update');
     Route::post('company/{company}/logo', [CompanyController::class, 'uploadLogo'])->middleware('can:company.logo')->name('company.logo.store');

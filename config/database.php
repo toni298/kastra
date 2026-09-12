@@ -60,7 +60,9 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA', base_path('storage/cacert.pem')),
                 PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-            ]) : [],
+                PDO::ATTR_TIMEOUT => (int) env('DB_CONNECT_TIMEOUT', 10),
+                PDO::ATTR_PERSISTENT => false,
+            ], fn($value) => $value !== null) : [],
         ],
 
         'mariadb' => [

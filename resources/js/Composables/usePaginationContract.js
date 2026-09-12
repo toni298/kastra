@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 // Kontrak JsonResource::collection($cursorPaginator) -> links.{next,prev} + meta.per_page.
 // Normalisasi format paginator mentah (next_page_url, per_page di root) sebagai fallback.
 export const usePaginationContract = (paginationRef) => {
+  const localPerPage = ref(10)
   const resolvedNextUrl = computed(
     () => paginationRef.value?.links?.next ?? paginationRef.value?.next_page_url ?? null
   )
@@ -31,7 +32,7 @@ export const usePaginationContract = (paginationRef) => {
     Boolean(resolvedNextCursor.value || resolvedPrevCursor.value)
   )
 
-  const localPerPage = ref(resolvedPerPage.value)
+  localPerPage.value = resolvedPerPage.value
   watch(
     () => resolvedPerPage.value,
     (value) => {

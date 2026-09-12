@@ -21,6 +21,7 @@ class StoreEmployeeRequest extends FormRequest
 
       return [
          'branch_id' => ['nullable', 'uuid', Rule::exists('branches', 'id')->where('company_id', $this->user()->company_id)],
+         'shift_id' => ['nullable', 'uuid', Rule::exists('shifts', 'id')->where('company_id', $this->user()->company_id)],
          'nik' => ['required', 'string', 'max:50', Rule::unique('employees', 'nik')->where('company_id', $this->user()->company_id)->ignore($employeeId)],
          'name' => ['required', 'string', 'max:255'],
          'phone' => ['nullable', 'string', 'max:32'],

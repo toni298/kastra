@@ -61,7 +61,7 @@ class PermissionGroupSeeder extends Seeder
             'group' => 'SDM / HR',
             'subgroup' => 'Karyawan',
             'sort' => 1,
-            'permissions' => ['hr.employees.view', 'hr.employees.create', 'hr.employees.edit', 'hr.employees.delete'],
+            'permissions' => ['hr.employees.view', 'hr.employees.create', 'hr.employees.edit', 'hr.employees.delete', 'hr.attendance.view', 'hr.attendance.edit', 'hr.attendance.clock', 'hr.shifts.manage', 'hr.commissions.view', 'hr.overtime.view', 'hr.overtime.create', 'hr.overtime.approve', 'hr.payroll.view', 'hr.payroll.generate', 'hr.payroll.post'],
         ],
         [
             'group' => 'Persediaan',

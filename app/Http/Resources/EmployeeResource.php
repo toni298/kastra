@@ -32,6 +32,12 @@ class EmployeeResource extends JsonResource
             'id' => $this->branch?->id,
             'name' => $this->branch?->name,
          ]),
+         'shift' => $this->whenLoaded('shift', fn() => [
+            'id' => $this->shift?->id,
+            'name' => $this->shift?->name,
+            'start_time' => $this->shift?->start_time,
+            'end_time' => $this->shift?->end_time,
+         ]),
       ];
    }
 
