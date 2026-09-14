@@ -103,10 +103,6 @@ Route::middleware(['auth', 'verified', 'onboarded', 'company.context', 'cashier.
     Route::get('hr/summary', HRSummaryController::class)->middleware('can:hr.employees.view')->name('hr.summary.index');
     Route::get('hr/employees', [EmployeeController::class, 'index'])->middleware('can:hr.employees.view')->name('hr.employees.index');
     Route::get('hr/attendance', [HRAttendanceController::class, 'index'])->middleware('can:hr.attendance.view')->name('hr.attendance.index');
-    Route::get('kiosk/attendance', [KioskAttendanceController::class, 'page'])->middleware('can:hr.attendance.clock')->name('kiosk.attendance');
-    Route::post('kiosk/clock', [KioskAttendanceController::class, 'clock'])
-        ->middleware('can:hr.attendance.clock')
-        ->name('kiosk.clock');
     Route::get('hr/commission', HRCommissionController::class)->middleware('can:hr.commissions.view')->name('hr.commission.index');
     Route::get('hr/payroll', HRPayrollController::class)->middleware('can:hr.payroll.view')->name('hr.payroll.index');
     Route::post('hr/employees', [EmployeeController::class, 'store'])->middleware('can:hr.employees.create')->name('hr.employees.store');
@@ -398,4 +394,10 @@ Route::middleware(['auth', 'verified', 'onboarded', 'company.context', 'cashier.
     Route::get('ecommerce/settings/domain', [App\Http\Controllers\Company\Store\StoreSettingsController::class, 'domain'])->middleware('can:store.settings.view')->name('ecommerce.settings.domain');
     Route::put('ecommerce/settings/domain', [App\Http\Controllers\Company\Store\StoreSettingsController::class, 'updateDomain'])->middleware('can:store.settings.edit')->name('ecommerce.settings.domain.update');
 });
+
+Route::middleware(['web', 'kiosk.device', 'throttle:60,1'])->group(function () {
+    Route::post('kiosk/clock', [KioskAttendanceController::class, 'clock'])->name('kiosk.clock');
+});
+Route::get('kiosk/attendance', [KioskAttendanceController::class, 'page'])->middleware(['web', 'throttle:60,1'])->name('kiosk.attendance');
+Route::get('kiosk/clock', [KioskAttendanceController::class, 'redirectToPage'])->middleware(['web', 'throttle:60,1'])->name('kiosk.clock.page');
 require __DIR__ . '/auth.php';

@@ -1,15 +1,19 @@
 <script setup>
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { Head } from '@inertiajs/vue3'
 import axios from 'axios'
 import { Delete, LoaderCircle, LogIn, ShieldCheck } from 'lucide-vue-next'
 import { useToastify } from '@/Composables/useToastify'
+import { useGeolocation } from '@/Composables/useGeolocation'
 
 const pin = ref('')
 const input = ref(null)
 const result = ref(null)
 const loading = ref(false)
 const toast = useToastify()
+const { coordinates, getCurrentPosition, permission } = useGeolocation()
+const locationNeedsAction = computed(() => ['denied', 'prompt', 'unsupported'].includes(permission.value))
+const kioskToken = import.meta.env.VITE_KIOSK_DEVICE_TOKEN || ''
 const props = defineProps({
   company: { type: Object, default: () => ({ name: 'Kastra', logo_url: null }) },
 })
@@ -27,15 +31,24 @@ const submit = async () => {
   if (pin.value.length !== 6 || loading.value) return
   loading.value = true
   try {
-    const response = await axios.post(route('kiosk.clock'), { pin: pin.value })
-    result.value = response.data.data
+    const location = coordinates.value || (await getCurrentPosition())
+    if (!location) {
+      toast.error('Aktifkan izin lokasi browser sebelum melakukan absensi.')
+      return
+    }
+    const response = await axios.post(
+      route('kiosk.clock'),
+      { pin: pin.value, ...location },
+      { headers: { 'X-Kiosk-Token': kioskToken } },
+    )
+    result.value = response.data
     clear()
     clearTimeout(resetTimer)
     resetTimer = setTimeout(() => {
       result.value = null
     }, 3000)
   } catch (error) {
-    toast.error(error.response?.data?.message || 'PIN tidak ditemukan.')
+    toast.error(error.response?.data?.ui_message || error.response?.data?.message || 'Absensi gagal diproses.')
     clear()
   } finally {
     loading.value = false
@@ -52,6 +65,7 @@ onMounted(() => {
   input.value?.focus()
   window.addEventListener('keydown', keydown)
 })
+const requestLocation = () => getCurrentPosition()
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', keydown)
   clearTimeout(resetTimer)
@@ -65,6 +79,25 @@ onBeforeUnmount(() => {
       class="mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl flex-col justify-center gap-8 lg:flex-row lg:items-center"
     >
       <section class="flex-1">
+        <div
+          v-if="locationNeedsAction"
+          class="mb-6 rounded-2xl border border-amber-300/40 bg-amber-400/10 p-4 text-sm text-amber-100"
+          role="alert"
+        >
+          <p class="font-semibold">Izin lokasi diperlukan</p>
+          <p class="mt-1 text-amber-200/80">
+            Aktifkan Location pada prompt browser agar absensi dapat dicatat.
+          </p>
+          <button
+            v-if="permission !== 'unsupported'"
+            type="button"
+            class="mt-3 rounded-lg bg-amber-300 px-3 py-2 font-semibold text-[#071426]"
+            @click="requestLocation"
+          >
+            Izinkan Lokasi
+          </button>
+          <p v-else class="mt-2 text-amber-200/80">Gunakan browser yang mendukung lokasi.</p>
+        </div>
         <div class="mb-8 flex items-center gap-3">
           <div
             class="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-2xl bg-emerald-400 text-[#071426]"
@@ -117,14 +150,26 @@ onBeforeUnmount(() => {
           <p class="mt-3 font-medium">Memproses absensi...</p>
           <p class="mt-1 text-xs text-slate-400">Mohon tunggu sebentar</p>
         </div>
-        <div v-else-if="result" class="mb-5 rounded-2xl bg-emerald-400 p-5 text-[#071426]">
+        <div
+          v-else-if="result"
+          class="mb-5 rounded-2xl p-5 text-[#071426]"
+          :class="result.status === 'success' ? 'bg-emerald-400' : 'bg-red-300'"
+          role="status"
+          aria-live="polite"
+        >
           <div class="flex items-center gap-2 font-semibold">
             <LogIn :size="18" />{{
-              result.action === 'clock_in' ? 'Clock in berhasil' : 'Clock out berhasil'
+              result.status === 'success'
+                ? result.action_type === 'CLOCK_IN'
+                  ? 'Clock in berhasil'
+                  : 'Clock out berhasil'
+                : 'Absensi ditolak'
             }}
           </div>
-          <p class="mt-2 text-2xl font-bold">{{ result.employee_name }}</p>
-          <p class="mt-1">{{ result.time }} · {{ result.status }}</p>
+          <p v-if="result.user_info" class="mt-2 text-2xl font-bold">
+            {{ result.user_info.name }}
+          </p>
+          <p class="mt-1">{{ result.ui_message }}</p>
         </div>
         <div v-else class="mb-5 rounded-2xl bg-[#183557] p-5 text-center">
           <p class="text-sm text-slate-300">PIN karyawan</p>

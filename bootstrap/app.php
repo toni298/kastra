@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'onboarded' => \App\Http\Middleware\EnsureOnboardingCompleted::class,
             'company.context' => \App\Http\Middleware\ResolveCompanyContext::class,
             'cashier.only' => \App\Http\Middleware\RedirectCashierToCashier::class,
+            'kiosk.device' => \App\Http\Middleware\EnsureKioskDevice::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

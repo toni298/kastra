@@ -28,10 +28,13 @@ class Employee extends Model
       'commission_value',
       'status',
       'pin',
+      'rfid_code',
+      'qr_code_data',
+      'face_recognition_hash',
       'hired_at',
    ];
 
-   protected $hidden = ['pin'];
+   protected $hidden = ['pin', 'face_recognition_hash'];
 
    protected function casts(): array
    {

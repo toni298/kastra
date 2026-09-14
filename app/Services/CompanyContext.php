@@ -46,6 +46,11 @@ class CompanyContext
         return $this->company;
     }
 
+    public function set(Company $company): void
+    {
+        $this->company = $company;
+    }
+
     public function id(): ?string
     {
         return $this->company === null

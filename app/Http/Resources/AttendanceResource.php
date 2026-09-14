@@ -24,10 +24,19 @@ class AttendanceResource extends JsonResource
             'end_time' => substr($this->shift->end_time, 0, 5),
          ] : null,
          'clock_in' => $this->clock_in?->format('H:i'),
+         'clock_in_location' => $this->location($this->clock_in_latitude, $this->clock_in_longitude),
          'clock_out' => $this->clock_out?->format('H:i'),
+         'clock_out_location' => $this->location($this->clock_out_latitude, $this->clock_out_longitude),
          'late_minutes' => $this->late_minutes,
          'status' => $this->status,
          'notes' => $this->notes,
       ];
+   }
+
+   private function location($latitude, $longitude): ?array
+   {
+      if ($latitude === null || $longitude === null) return null;
+
+      return ['latitude' => (float) $latitude, 'longitude' => (float) $longitude];
    }
 }

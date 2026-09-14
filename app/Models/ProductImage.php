@@ -46,7 +46,7 @@ class ProductImage extends Model
             $this->thumbnail_path,
             $this->webp_path,
             $this->original_path,
-        ])->first(fn (?string $candidate) => $candidate && $disk->exists($candidate));
+        ])->first(fn(?string $candidate) => $candidate && $disk->exists($candidate));
 
         if (! $path) {
             return null;
