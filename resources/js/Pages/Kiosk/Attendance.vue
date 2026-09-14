@@ -27,7 +27,7 @@ const submit = async () => {
   if (pin.value.length !== 6 || loading.value) return
   loading.value = true
   try {
-    const response = await axios.post(route('api.kiosk.clock'), { pin: pin.value })
+    const response = await axios.post(route('kiosk.clock'), { pin: pin.value })
     result.value = response.data.data
     clear()
     clearTimeout(resetTimer)

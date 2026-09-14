@@ -52,9 +52,6 @@ class ProductImage extends Model
             return null;
         }
 
-        $url = $disk->url($path);
-        $relativeUrl = parse_url($url, PHP_URL_PATH);
-
-        return is_string($relativeUrl) ? $relativeUrl : $url;
+        return $disk->url($path);
     }
 }

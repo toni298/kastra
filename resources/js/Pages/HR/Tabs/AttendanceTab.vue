@@ -211,14 +211,18 @@ onMounted(() => fetchAttendances())
 
 <template>
   <div class="space-y-5">
-  <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+    <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
       <div>
         <h2 class="text-lg font-semibold text-slate-950 dark:text-white">Absensi & Shift</h2>
         <p class="mt-1 text-sm text-slate-500">Pantau kehadiran dan koreksi log operasional tim.</p>
       </div>
       <div class="flex flex-wrap gap-2">
-        <Button v-if="activeSubTab === 'shifts'" @click="openShift()"><Plus :size="16" class="mr-2" />Tambah Shift</Button>
-        <Button v-else @click="openKiosk"><ExternalLink :size="16" class="mr-2" />Buka Kiosk Absensi</Button>
+        <Button v-if="activeSubTab === 'shifts'" @click="openShift()"
+          ><Plus :size="16" class="mr-2" />Tambah Shift</Button
+        >
+        <Button v-else @click="openKiosk"
+          ><ExternalLink :size="16" class="mr-2" />Buka Kiosk Absensi</Button
+        >
       </div>
     </div>
     <nav
@@ -263,7 +267,10 @@ onMounted(() => fetchAttendances())
       </section>
       <DataPanel>
         <div class="relative">
-          <div v-if="attendanceLoading" class="pointer-events-none absolute inset-0 z-10 flex min-h-40 items-center justify-center bg-white/70 dark:bg-[#102542]/70">
+          <div
+            v-if="attendanceLoading"
+            class="pointer-events-none absolute inset-0 z-10 flex min-h-40 items-center justify-center bg-white/70 dark:bg-[#102542]/70"
+          >
             <Spinner label="Memuat riwayat absensi..." />
           </div>
           <DataTable
@@ -278,19 +285,63 @@ onMounted(() => fetchAttendances())
             @filter="applyFilters"
             @navigate="navigate"
           >
-          <template #filters>
-            <DatePicker v-model="date" aria-label="Tanggal absensi" @update:model-value="applyFilters" />
-            <select v-model="status" class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm" @change="applyFilters">
-              <option value="">Semua status</option><option value="present">Tepat waktu</option><option value="late">Terlambat</option><option value="absent">Alpa</option><option value="incomplete">Belum lengkap</option>
-            </select>
-          </template>
-          <template #cell-employee="{ item }"><div class="font-medium text-slate-900 dark:text-white">{{ item.employee?.name }}</div><div class="text-xs text-slate-500">{{ item.employee?.nik }}</div></template>
-          <template #cell-shift="{ item }">{{ item.shift?.name || '-' }}</template>
-          <template #cell-clock_in="{ item }">{{ item.clock_in || '-' }}</template>
-          <template #cell-clock_out="{ item }">{{ item.clock_out || '-' }}</template>
-          <template #cell-status="{ item }"><span :class="['rounded-full px-2.5 py-1 text-xs font-semibold', item.status === 'late' ? 'bg-amber-100 text-amber-700' : item.status === 'incomplete' ? 'bg-slate-100 text-slate-600' : 'bg-emerald-100 text-emerald-700']">{{ item.status === 'late' ? 'Terlambat' : item.status === 'incomplete' ? 'Belum lengkap' : item.status === 'absent' ? 'Alpa' : 'Tepat waktu' }}</span></template>
-          <template #cell-late_minutes="{ item }">{{ item.late_minutes || 0 }} menit</template>
-          <template #cell-actions="{ item }"><button class="inline-flex items-center text-sm font-medium text-emerald-700" @click="openCorrection(item)"><Pencil :size="15" class="mr-1" />Koreksi</button></template>
+            <template #filters>
+              <DatePicker
+                v-model="date"
+                aria-label="Tanggal absensi"
+                @update:model-value="applyFilters"
+              />
+              <select
+                v-model="status"
+                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
+                @change="applyFilters"
+              >
+                <option value="">Semua status</option>
+                <option value="present">Tepat waktu</option>
+                <option value="late">Terlambat</option>
+                <option value="absent">Alpa</option>
+                <option value="incomplete">Belum lengkap</option>
+              </select>
+            </template>
+            <template #cell-employee="{ item }"
+              ><div class="font-medium text-slate-900 dark:text-white">
+                {{ item.employee?.name }}
+              </div>
+              <div class="text-xs text-slate-500">{{ item.employee?.nik }}</div></template
+            >
+            <template #cell-shift="{ item }">{{ item.shift?.name || '-' }}</template>
+            <template #cell-clock_in="{ item }">{{ item.clock_in || '-' }}</template>
+            <template #cell-clock_out="{ item }">{{ item.clock_out || '-' }}</template>
+            <template #cell-status="{ item }"
+              ><span
+                :class="[
+                  'rounded-full px-2.5 py-1 text-xs font-semibold',
+                  item.status === 'late'
+                    ? 'bg-amber-100 text-amber-700'
+                    : item.status === 'incomplete'
+                      ? 'bg-slate-100 text-slate-600'
+                      : 'bg-emerald-100 text-emerald-700',
+                ]"
+                >{{
+                  item.status === 'late'
+                    ? 'Terlambat'
+                    : item.status === 'incomplete'
+                      ? 'Belum lengkap'
+                      : item.status === 'absent'
+                        ? 'Alpa'
+                        : 'Tepat waktu'
+                }}</span
+              ></template
+            >
+            <template #cell-late_minutes="{ item }">{{ item.late_minutes || 0 }} menit</template>
+            <template #cell-actions="{ item }"
+              ><button
+                class="inline-flex items-center text-sm font-medium text-emerald-700"
+                @click="openCorrection(item)"
+              >
+                <Pencil :size="15" class="mr-1" />Koreksi
+              </button></template
+            >
           </DataTable>
         </div>
       </DataPanel>
@@ -305,23 +356,88 @@ onMounted(() => fetchAttendances())
       />
     </template>
     <ShiftDetailDrawer v-if="selectedShift" :shift="selectedShift" @close="selectedShift = null" />
-    <Modal v-if="correction" :model-value="true" title="Koreksi Absensi" description="Perubahan akan tercatat sebagai adjustment admin." size="lg" @update:model-value="correction = null">
+    <Modal
+      v-if="correction"
+      :model-value="true"
+      title="Koreksi Absensi"
+      description="Perubahan akan tercatat sebagai adjustment admin."
+      size="lg"
+      @update:model-value="correction = null"
+    >
       <div class="grid gap-4 sm:grid-cols-2">
-        <label class="text-sm">Jam masuk<input v-model="correctionForm.clock_in" type="datetime-local" class="mt-1 w-full rounded-xl border-slate-200" /></label>
-        <label class="text-sm">Jam keluar<input v-model="correctionForm.clock_out" type="datetime-local" class="mt-1 w-full rounded-xl border-slate-200" /></label>
-        <label class="text-sm">Status<select v-model="correctionForm.status" class="mt-1 w-full rounded-xl border-slate-200"><option value="present">Tepat waktu</option><option value="late">Terlambat</option><option value="incomplete">Belum lengkap</option><option value="absent">Alpa</option></select></label>
-        <label class="text-sm">Keterlambatan (menit)<input v-model.number="correctionForm.late_minutes" type="number" min="0" class="mt-1 w-full rounded-xl border-slate-200" /></label>
+        <label class="text-sm"
+          >Jam masuk<input
+            v-model="correctionForm.clock_in"
+            type="datetime-local"
+            class="mt-1 w-full rounded-xl border-slate-200"
+        /></label>
+        <label class="text-sm"
+          >Jam keluar<input
+            v-model="correctionForm.clock_out"
+            type="datetime-local"
+            class="mt-1 w-full rounded-xl border-slate-200"
+        /></label>
+        <label class="text-sm"
+          >Status<select
+            v-model="correctionForm.status"
+            class="mt-1 w-full rounded-xl border-slate-200"
+          >
+            <option value="present">Tepat waktu</option>
+            <option value="late">Terlambat</option>
+            <option value="incomplete">Belum lengkap</option>
+            <option value="absent">Alpa</option>
+          </select></label
+        >
+        <label class="text-sm"
+          >Keterlambatan (menit)<input
+            v-model.number="correctionForm.late_minutes"
+            type="number"
+            min="0"
+            class="mt-1 w-full rounded-xl border-slate-200"
+        /></label>
       </div>
-      <template #footer><Button variant="secondary" @click="correction = null">Batal</Button><Button @click="saveCorrection">Simpan Koreksi</Button></template>
+      <template #footer
+        ><Button variant="secondary" @click="correction = null">Batal</Button
+        ><Button @click="saveCorrection">Simpan Koreksi</Button></template
+      >
     </Modal>
-    <Modal v-if="shiftModal" :model-value="true" :title="editingShift ? 'Ubah Shift' : 'Tambah Shift'" size="lg" @update:model-value="shiftModal = false">
+    <Modal
+      v-if="shiftModal"
+      :model-value="true"
+      :title="editingShift ? 'Ubah Shift' : 'Tambah Shift'"
+      size="lg"
+      @update:model-value="shiftModal = false"
+    >
       <div class="grid gap-4 sm:grid-cols-2">
-        <label class="text-sm sm:col-span-2">Nama shift<input v-model="shiftForm.name" class="mt-1 w-full rounded-xl border-slate-200" /></label>
-        <label class="text-sm">Jam masuk<input v-model="shiftForm.start_time" type="time" class="mt-1 w-full rounded-xl border-slate-200" /></label>
-        <label class="text-sm">Jam keluar<input v-model="shiftForm.end_time" type="time" class="mt-1 w-full rounded-xl border-slate-200" /></label>
-        <label class="text-sm">Grace period (menit)<input v-model.number="shiftForm.grace_period_minutes" type="number" min="0" class="mt-1 w-full rounded-xl border-slate-200" /></label>
+        <label class="text-sm sm:col-span-2"
+          >Nama shift<input
+            v-model="shiftForm.name"
+            class="mt-1 w-full rounded-xl border-slate-200"
+        /></label>
+        <label class="text-sm"
+          >Jam masuk<input
+            v-model="shiftForm.start_time"
+            type="time"
+            class="mt-1 w-full rounded-xl border-slate-200"
+        /></label>
+        <label class="text-sm"
+          >Jam keluar<input
+            v-model="shiftForm.end_time"
+            type="time"
+            class="mt-1 w-full rounded-xl border-slate-200"
+        /></label>
+        <label class="text-sm"
+          >Grace period (menit)<input
+            v-model.number="shiftForm.grace_period_minutes"
+            type="number"
+            min="0"
+            class="mt-1 w-full rounded-xl border-slate-200"
+        /></label>
       </div>
-      <template #footer><Button variant="secondary" @click="shiftModal = false">Batal</Button><Button @click="saveShift">Simpan Shift</Button></template>
+      <template #footer
+        ><Button variant="secondary" @click="shiftModal = false">Batal</Button
+        ><Button @click="saveShift">Simpan Shift</Button></template
+      >
     </Modal>
   </div>
 </template>

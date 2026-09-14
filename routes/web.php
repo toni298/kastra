@@ -104,9 +104,9 @@ Route::middleware(['auth', 'verified', 'onboarded', 'company.context', 'cashier.
     Route::get('hr/employees', [EmployeeController::class, 'index'])->middleware('can:hr.employees.view')->name('hr.employees.index');
     Route::get('hr/attendance', [HRAttendanceController::class, 'index'])->middleware('can:hr.attendance.view')->name('hr.attendance.index');
     Route::get('kiosk/attendance', [KioskAttendanceController::class, 'page'])->middleware('can:hr.attendance.clock')->name('kiosk.attendance');
-    Route::prefix('api/kiosk')->name('api.kiosk.')->group(function () {
-        Route::post('clock', [KioskAttendanceController::class, 'clock'])->middleware('can:hr.attendance.clock')->name('clock');
-    });
+    Route::post('kiosk/clock', [KioskAttendanceController::class, 'clock'])
+        ->middleware('can:hr.attendance.clock')
+        ->name('kiosk.clock');
     Route::get('hr/commission', HRCommissionController::class)->middleware('can:hr.commissions.view')->name('hr.commission.index');
     Route::get('hr/payroll', HRPayrollController::class)->middleware('can:hr.payroll.view')->name('hr.payroll.index');
     Route::post('hr/employees', [EmployeeController::class, 'store'])->middleware('can:hr.employees.create')->name('hr.employees.store');
@@ -153,7 +153,7 @@ Route::middleware(['auth', 'verified', 'onboarded', 'company.context', 'cashier.
     Route::get('hr/payrolls/{payroll}/items', [PayrollItemController::class, 'index'])
         ->middleware('can:hr.payroll.view')
         ->name('hr.payrolls.items.index');
-    Route::get('hr/payroll-items/{item}/print', [PayrollItemController::class, 'printPdf'])
+    Route::get('hr/payroll-items/{payrollItem}/print', [PayrollItemController::class, 'print'])
         ->middleware('can:hr.payroll.view')
         ->name('hr.payroll-items.print');
     Route::get('cabang', [CabangController::class, 'index'])->middleware('can:cabang.view')->name('cabang.index');

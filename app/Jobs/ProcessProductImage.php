@@ -23,8 +23,8 @@ class ProcessProductImage implements ShouldQueue
         $image->update(['status' => 'processing']);
 
         try {
-            $source = Storage::disk('public')->path($image->original_path);
-            $sourceData = file_get_contents($source);
+            $disk = Storage::disk('public');
+            $sourceData = $disk->get($image->original_path);
 
             // Suppress GD warnings (e.g. libpng incorrect sRGB profile / iCCP warnings).
             // The image still decodes successfully; we just silence the noisy warnings.
@@ -40,9 +40,9 @@ class ProcessProductImage implements ShouldQueue
             $webpPath = "$directory/$name.webp";
             $thumbnailPath = "$directory/{$name}_thumb.webp";
 
-            Storage::disk('public')->makeDirectory($directory);
-
-            imagewebp($resource, Storage::disk('public')->path($webpPath), 82);
+            $webpFile = tempnam(sys_get_temp_dir(), 'kastra-webp-');
+            $thumbnailFile = tempnam(sys_get_temp_dir(), 'kastra-thumb-');
+            imagewebp($resource, $webpFile, 82);
 
             $width = imagesx($resource);
             $height = imagesy($resource);
@@ -50,7 +50,13 @@ class ProcessProductImage implements ShouldQueue
             $thumbHeight = max(1, (int) round($height * ($thumbWidth / $width)));
             $thumb = imagecreatetruecolor($thumbWidth, $thumbHeight);
             imagecopyresampled($thumb, $resource, 0, 0, 0, 0, $thumbWidth, $thumbHeight, $width, $height);
-            imagewebp($thumb, Storage::disk('public')->path($thumbnailPath), 78);
+            imagewebp($thumb, $thumbnailFile, 78);
+
+            $disk->put($webpPath, file_get_contents($webpFile), ['visibility' => 'public']);
+            $disk->put($thumbnailPath, file_get_contents($thumbnailFile), ['visibility' => 'public']);
+
+            @unlink($webpFile);
+            @unlink($thumbnailFile);
 
             imagedestroy($thumb);
             imagedestroy($resource);
