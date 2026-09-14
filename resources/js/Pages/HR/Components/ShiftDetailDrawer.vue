@@ -23,7 +23,7 @@ const loadEmployees = async () => {
   error.value = ''
 
   try {
-    const response = await axios.get(route('api.hr.shifts.employees', { shift: props.shift.id }), {
+    const response = await axios.get(route('hr.shifts.employees', { shift: props.shift.id }), {
       params: { search: search.value, per_page: 50 },
     })
     if (currentRequest === requestId)

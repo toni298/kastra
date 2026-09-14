@@ -23,7 +23,7 @@ const load = async () => {
   error.value = ''
   try {
     const response = await axios.get(
-      route('api.hr.commissions.details', { employee: props.employee.id }),
+      route('hr.commissions.details', { employee: props.employee.id }),
       { params: { from: props.filters.from, to: props.filters.to } }
     )
     if (current === requestId) items.value = response.data?.data ?? []

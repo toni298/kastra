@@ -15,7 +15,7 @@ const processing = ref(false)
 const form = ref({ employee_id: '', overtime_date: new Date().toISOString().slice(0, 10), hours: 1, hourly_rate: 0, reason: '' })
 const submit = async () => {
   processing.value = true
-  try { await axios.post(route('api.hr.overtimes.store'), form.value); toast.success('Pengajuan lembur berhasil dicatat.'); emit('saved'); emit('close') }
+  try { await axios.post(route('hr.overtimes.store'), form.value); toast.success('Pengajuan lembur berhasil dicatat.'); emit('saved'); emit('close') }
   catch (error) { toast.error(error.response?.data?.message || 'Pengajuan lembur gagal disimpan.') }
   finally { processing.value = false }
 }

@@ -59,6 +59,12 @@ use App\Http\Controllers\KioskAttendanceController;
 use App\Http\Controllers\HR\HRCommissionController;
 use App\Http\Controllers\HR\HRPayrollController;
 use App\Http\Controllers\HR\HRSummaryController;
+use App\Http\Controllers\HR\AttendanceController;
+use App\Http\Controllers\HR\CommissionController;
+use App\Http\Controllers\HR\OvertimeController;
+use App\Http\Controllers\HR\PayrollController;
+use App\Http\Controllers\HR\PayrollItemController;
+use App\Http\Controllers\HR\ShiftController;
 use App\Http\Controllers\Api\InventoryMovementController;
 use Illuminate\Support\Facades\Route;
 
@@ -107,6 +113,49 @@ Route::middleware(['auth', 'verified', 'onboarded', 'company.context', 'cashier.
     Route::put('hr/employees/{employee}', [EmployeeController::class, 'update'])->middleware('can:hr.employees.edit')->name('hr.employees.update');
     Route::delete('hr/employees/{employee}', [EmployeeController::class, 'destroy'])->middleware('can:hr.employees.delete')->name('hr.employees.destroy');
     Route::post('hr/employees/{employee}/reset-pin', [EmployeeController::class, 'resetPin'])->middleware('can:hr.employees.edit')->name('hr.employees.reset-pin');
+    Route::get('hr/attendances', [AttendanceController::class, 'index'])
+        ->middleware('can:hr.attendance.view')
+        ->name('hr.attendances.index');
+    Route::put('hr/attendances/{attendance}', [AttendanceController::class, 'update'])
+        ->middleware('can:hr.attendance.edit')
+        ->name('hr.attendances.update');
+    Route::get('hr/shifts/{shift}/employees', [ShiftController::class, 'employees'])
+        ->middleware('can:hr.attendance.view')
+        ->name('hr.shifts.employees');
+    Route::apiResource('hr/shifts', ShiftController::class)
+        ->except(['show'])
+        ->middleware('can:hr.shifts.manage')
+        ->names('hr.shifts');
+    Route::get('hr/commissions', [CommissionController::class, 'index'])
+        ->middleware('can:hr.commissions.view')
+        ->name('hr.commissions.index');
+    Route::get('hr/commissions/{employee}/details', [CommissionController::class, 'details'])
+        ->middleware('can:hr.commissions.view')
+        ->name('hr.commissions.details');
+    Route::get('hr/overtimes', [OvertimeController::class, 'index'])
+        ->middleware('can:hr.overtime.view')
+        ->name('hr.overtimes.index');
+    Route::post('hr/overtimes', [OvertimeController::class, 'store'])
+        ->middleware('can:hr.overtime.create')
+        ->name('hr.overtimes.store');
+    Route::put('hr/overtimes/{overtime}/status', [OvertimeController::class, 'updateStatus'])
+        ->middleware('can:hr.overtime.approve')
+        ->name('hr.overtimes.status');
+    Route::get('hr/payrolls', [PayrollController::class, 'index'])
+        ->middleware('can:hr.payroll.view')
+        ->name('hr.payrolls.index');
+    Route::post('hr/payrolls/generate', [PayrollController::class, 'generate'])
+        ->middleware('can:hr.payroll.generate')
+        ->name('hr.payrolls.generate');
+    Route::post('hr/payrolls/{payroll}/post', [PayrollController::class, 'postToJournal'])
+        ->middleware('can:hr.payroll.post')
+        ->name('hr.payrolls.post');
+    Route::get('hr/payrolls/{payroll}/items', [PayrollItemController::class, 'index'])
+        ->middleware('can:hr.payroll.view')
+        ->name('hr.payrolls.items.index');
+    Route::get('hr/payroll-items/{item}/print', [PayrollItemController::class, 'printPdf'])
+        ->middleware('can:hr.payroll.view')
+        ->name('hr.payroll-items.print');
     Route::get('cabang', [CabangController::class, 'index'])->middleware('can:cabang.view')->name('cabang.index');
     Route::post('cabang', [CabangController::class, 'store'])->middleware('can:cabang.create')->name('cabang.store');
     Route::put('cabang/{cabang}', [CabangController::class, 'update'])->middleware('can:cabang.edit')->name('cabang.update');

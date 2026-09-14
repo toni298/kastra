@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import axios from 'axios'
-import { AlertTriangle, Check, CircleCheck, CircleX, Clock3, FileText, Plus, Receipt, XCircle } from 'lucide-vue-next'
+import { AlertTriangle, Check, CircleCheck, CircleX, Clock3, FileText, Plus, Receipt } from 'lucide-vue-next'
 import Button from '@/Components/UI/Button.vue'
 import DataPanel from '@/Components/UI/DataPanel.vue'
 import DataTable from '@/Components/UI/DataTable.vue'
@@ -43,7 +43,7 @@ const fetchCommission = async (force = false, cursor = '') => {
   const key = JSON.stringify(commissionParams(cursor))
   if (!force && commissionCache.has(key)) { const cached = commissionCache.get(key); commission.value = cached.data; commissionSummary.value = cached.summary; return }
   commissionLoading.value = true
-  try { const response = await axios.get(route('api.hr.commissions.index'), { params: commissionParams(cursor) }); const cached = { data: normalize(response.data?.data), summary: response.data?.summary ?? {} }; commissionCache.set(key, cached); commission.value = cached.data; commissionSummary.value = cached.summary }
+  try { const response = await axios.get(route('hr.commissions.index'), { params: commissionParams(cursor) }); const cached = { data: normalize(response.data?.data), summary: response.data?.summary ?? {} }; commissionCache.set(key, cached); commission.value = cached.data; commissionSummary.value = cached.summary }
   catch (error) { toast.error(error.response?.data?.message || 'Rekap komisi gagal dimuat.') }
   finally { commissionLoading.value = false }
 }
@@ -51,7 +51,7 @@ const fetchOvertime = async (force = false, cursor = '') => {
   const key = JSON.stringify(overtimeParams(cursor))
   if (!force && overtimeCache.has(key)) { const cached = overtimeCache.get(key); overtime.value = cached.data; overtimeSummary.value = cached.summary; return }
   overtimeLoading.value = true
-  try { const response = await axios.get(route('api.hr.overtimes.index'), { params: overtimeParams(cursor) }); const cached = { data: normalize(response.data?.data), summary: response.data?.summary ?? {} }; overtimeCache.set(key, cached); overtime.value = cached.data; overtimeSummary.value = cached.summary }
+  try { const response = await axios.get(route('hr.overtimes.index'), { params: overtimeParams(cursor) }); const cached = { data: normalize(response.data?.data), summary: response.data?.summary ?? {} }; overtimeCache.set(key, cached); overtime.value = cached.data; overtimeSummary.value = cached.summary }
   catch (error) { toast.error(error.response?.data?.message || 'Log lembur gagal dimuat.') }
   finally { overtimeLoading.value = false }
 }
@@ -64,7 +64,7 @@ const formatIndonesianDate = (value) => {
   return date.length === 3 ? `${date[2]}/${date[1]}/${date[0]}` : value
 }
 const requestApproval = (row, status) => { confirmation.value = { row, status } }
-const approve = async (row, status) => { try { await axios.put(route('api.hr.overtimes.status', { overtime: row.id }), { status }); toast.success('Status lembur berhasil diperbarui.'); overtimeCache.clear(); fetchOvertime(true) } catch (error) { toast.error(error.response?.data?.message || 'Status lembur gagal diperbarui.') } }
+const approve = async (row, status) => { try { await axios.put(route('hr.overtimes.status', { overtime: row.id }), { status }); toast.success('Status lembur berhasil diperbarui.'); overtimeCache.clear(); fetchOvertime(true) } catch (error) { toast.error(error.response?.data?.message || 'Status lembur gagal diperbarui.') } }
 const confirmApproval = async () => { if (!confirmation.value) return; const action = confirmation.value; confirmation.value = null; await approve(action.row, action.status) }
 const refreshOvertime = () => { overtimeCache.clear(); fetchOvertime(true) }
 const commissionCards = computed(() => [{ label: 'Total Komisi Terkumpul', value: formatCurrency(commissionSummary.value.total_commission), icon: Receipt }, { label: 'Komisi Kasir Teratas', value: commissionSummary.value.top_employee || '-', icon: Check }, { label: 'Total Unit Terjual', value: formatQty(commissionSummary.value.total_qty), icon: FileText }, { label: 'Status Komisi Unpaid', value: formatCurrency(commissionSummary.value.unpaid), icon: Clock3 }])

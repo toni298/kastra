@@ -91,7 +91,7 @@ const fetchAttendances = async ({ cursor = '', force = false } = {}) => {
   }
   attendanceLoading.value = true
   try {
-    const response = await axios.get(route('api.hr.attendances.index'), {
+    const response = await axios.get(route('hr.attendances.index'), {
       params: {
         date: date.value,
         status: status.value,
@@ -117,7 +117,7 @@ const fetchShifts = async (force = false) => {
   if (shiftsLoaded.value && !force) return
   shiftsLoading.value = true
   try {
-    const response = await axios.get(route('api.hr.shifts.index'))
+    const response = await axios.get(route('hr.shifts.index'))
     shifts.value = response.data?.data ?? []
     shiftsLoaded.value = true
   } catch (error) {
@@ -149,7 +149,7 @@ const openCorrection = (item) => {
 const saveCorrection = async () => {
   try {
     await axios.put(
-      route('api.hr.attendances.update', { attendance: correction.value.id }),
+      route('hr.attendances.update', { attendance: correction.value.id }),
       correctionForm.value
     )
     toast.success('Koreksi absensi berhasil disimpan.')
@@ -182,8 +182,8 @@ const openShift = (shift = null) => {
 const saveShift = async () => {
   try {
     const url = editingShift.value
-      ? route('api.hr.shifts.update', { shift: editingShift.value.id })
-      : route('api.hr.shifts.store')
+      ? route('hr.shifts.update', { shift: editingShift.value.id })
+      : route('hr.shifts.store')
     await axios({ method: editingShift.value ? 'put' : 'post', url, data: shiftForm.value })
     toast.success('Shift berhasil disimpan.')
     shiftModal.value = false
@@ -196,7 +196,7 @@ const saveShift = async () => {
 const deleteShift = async (shift) => {
   if (!window.confirm(`Hapus shift ${shift.name}?`)) return
   try {
-    await axios.delete(route('api.hr.shifts.destroy', { shift: shift.id }))
+    await axios.delete(route('hr.shifts.destroy', { shift: shift.id }))
     toast.success('Shift berhasil dihapus.')
     shiftsLoaded.value = false
     fetchShifts(true)

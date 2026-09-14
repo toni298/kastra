@@ -29,7 +29,7 @@ const formatIndonesianDate = (value) => {
 const fetchPayrolls = async () => {
   loading.value = true
   try {
-    const response = await axios.get(route('api.hr.payrolls.index'), { params: { period: period.value || undefined, status: status.value || undefined, per_page: 10 } })
+    const response = await axios.get(route('hr.payrolls.index'), { params: { period: period.value || undefined, status: status.value || undefined, per_page: 10 } })
     rows.value = response.data?.data ?? { data: [], links: {}, meta: {} }
   } catch (error) {
     toast.error(error.response?.data?.message || 'Riwayat payroll gagal dimuat.')
@@ -50,7 +50,7 @@ const cards = computed(() => {
 const postPayroll = async () => {
   if (!posting.value) return
   try {
-    await axios.post(route('api.hr.payrolls.post', { payroll: posting.value.id }))
+    await axios.post(route('hr.payrolls.post', { payroll: posting.value.id }))
     toast.success('Payroll berhasil diposting ke jurnal.')
     posting.value = null
     fetchPayrolls()
