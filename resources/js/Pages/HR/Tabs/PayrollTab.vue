@@ -1,7 +1,7 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import axios from 'axios'
-import { Check, FileText, Plus, Send } from 'lucide-vue-next'
+import { Check, FileText, Filter, Plus, Send } from 'lucide-vue-next'
 import Button from '@/Components/UI/Button.vue'
 import Badge from '@/Components/UI/Badge.vue'
 import DataPanel from '@/Components/UI/DataPanel.vue'
@@ -12,6 +12,7 @@ import { formatCurrency } from '@/Utils/helpers'
 import { useToastify } from '@/Composables/useToastify'
 import PayrollProcessModal from '../Components/PayrollProcessModal.vue'
 import PayrollDetailDrawer from '../Components/PayrollDetailDrawer.vue'
+import PayrollFilters from '../Components/PayrollFilters.vue'
 
 const toast = useToastify()
 const rows = ref({ data: [], links: {}, meta: {} })
@@ -21,6 +22,9 @@ const selected = ref(null)
 const period = ref('')
 const status = ref('')
 const posting = ref(null)
+const filterOpen = ref(false)
+const filterButton = ref(null)
+const filterPanelStyle = ref({})
 const formatIndonesianDate = (value) => {
   if (!value) return '-'
   const [year, month, day] = String(value).slice(0, 10).split('-')
@@ -42,6 +46,23 @@ const fetchPayrolls = async () => {
   } finally {
     loading.value = false
   }
+}
+const toggleFilters = async () => {
+  filterOpen.value = !filterOpen.value
+  if (!filterOpen.value) return
+  await nextTick()
+  const rect = filterButton.value?.getBoundingClientRect()
+  if (!rect) return
+  filterPanelStyle.value = {
+    top: `${rect.bottom + 8}px`,
+    left: `${Math.min(rect.left, window.innerWidth - 360)}px`,
+  }
+}
+const applyFilters = (filters) => {
+  period.value = filters.period
+  status.value = filters.status
+  filterOpen.value = false
+  fetchPayrolls()
 }
 const statusLabel = (value) =>
   ({ draft: 'Draft', approved: 'Approved', posted: 'Posted' })[value] ?? value
@@ -121,26 +142,24 @@ onMounted(fetchPayrolls)
           :items="rows.data || []"
           :pagination="rows"
           :loading="loading"
-          searchable
-          search-placeholder="Cari periode payroll..."
-          @filter="fetchPayrolls"
           ><template #filters
-            ><select
-              v-model="period"
-              class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-              @change="fetchPayrolls"
-            >
-              <option value="">Semua periode</option></select
-            ><select
-              v-model="status"
-              class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-              @change="fetchPayrolls"
-            >
-              <option value="">Semua status</option>
-              <option value="draft">Draft</option>
-              <option value="approved">Approved</option>
-              <option value="posted">Posted</option>
-            </select></template
+            ><div class="relative inline-block">
+              <button
+                ref="filterButton"
+                type="button"
+                class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-[#29476b] dark:bg-[#102542] dark:text-slate-200"
+                @click="toggleFilters"
+              ><Filter :size="16" class="mr-2" />Filter</button>
+              <PayrollFilters
+                v-if="filterOpen"
+                :period="period"
+                :status="status"
+                :panel-style="filterPanelStyle"
+                :trigger-element="filterButton"
+                @close="filterOpen = false"
+                @apply="applyFilters"
+              />
+            </div></template
           ><template #thead
             ><tr>
               <th>Periode</th>

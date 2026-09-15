@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Services\InertiaAuthorizationService;
 use App\Services\CompanyContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -43,8 +44,12 @@ class AuthenticatedSessionController extends Controller
     /**
      * Destroy an authenticated session.
      */
-    public function destroy(Request $request, CompanyContext $companyContext): RedirectResponse
+    public function destroy(Request $request, CompanyContext $companyContext, InertiaAuthorizationService $authorization): RedirectResponse
     {
+        if ($request->user()) {
+            $authorization->forget($request->user());
+        }
+
         $companyContext->forget($request->session());
         Auth::guard('web')->logout();
 

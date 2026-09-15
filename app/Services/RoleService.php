@@ -54,11 +54,8 @@ class RoleService
 
     private function forgetAuthorizationSnapshots(Role $role): void
     {
-        $authorization = app(InertiaAuthorizationService::class);
-        $role->loadMissing('users');
-
-        foreach ($role->users as $user) {
-            $authorization->forget($user);
+        if ($role->company_id) {
+            app(InertiaAuthorizationService::class)->forgetCompany((string) $role->company_id);
         }
     }
 }

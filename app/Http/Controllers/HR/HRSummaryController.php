@@ -4,15 +4,15 @@ namespace App\Http\Controllers\HR;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Employee\IndexEmployeeRequest;
-use App\Repositories\EmployeeRepository;
 use App\Services\CompanyContext;
+use App\Services\HRSummaryService;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class HRSummaryController extends Controller
 {
    public function __construct(
-      private EmployeeRepository $repository,
+      private HRSummaryService $summaryService,
       private CompanyContext $companyContext,
    ) {}
 
@@ -20,7 +20,7 @@ class HRSummaryController extends Controller
    {
       return Inertia::render('HR/Index', [
          'activeTab' => 'summary',
-         'summary' => $this->repository->summary((string) $this->companyContext->id()),
+         'summary' => $this->summaryService->build((string) $this->companyContext->id()),
       ]);
    }
 }

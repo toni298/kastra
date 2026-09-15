@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import axios from 'axios'
 import {
   AlertTriangle,
@@ -10,12 +10,11 @@ import {
   FileText,
   Plus,
   Receipt,
+  Filter,
 } from 'lucide-vue-next'
 import Button from '@/Components/UI/Button.vue'
 import DataPanel from '@/Components/UI/DataPanel.vue'
 import DataTable from '@/Components/UI/DataTable.vue'
-import DateRangePicker from '@/Components/UI/DateRangePicker.vue'
-import DatePicker from '@/Components/UI/DatePicker.vue'
 import Badge from '@/Components/UI/Badge.vue'
 import Spinner from '@/Components/UI/Spinner.vue'
 import Modal from '@/Components/UI/Modal.vue'
@@ -23,6 +22,7 @@ import { formatCurrency, formatQty } from '@/Utils/helpers'
 import { useToastify } from '@/Composables/useToastify'
 import CommissionDetailDrawer from '../Components/CommissionDetailDrawer.vue'
 import OvertimeFormModal from '../Components/OvertimeFormModal.vue'
+import CommissionOvertimeFilters from '../Components/CommissionOvertimeFilters.vue'
 
 defineProps({})
 const toast = useToastify()
@@ -46,6 +46,9 @@ const overtimeCache = new Map()
 const selectedEmployee = ref(null)
 const overtimeModal = ref(false)
 const confirmation = ref(null)
+const filterOpen = ref(false)
+const filterButton = ref(null)
+const filterPanelStyle = ref({})
 const normalize = (payload) =>
   Array.isArray(payload)
     ? { data: payload, links: {}, meta: {} }
@@ -119,6 +122,30 @@ const switchTab = (tab) => {
 }
 const applyCommission = () => fetchCommission()
 const applyOvertime = () => fetchOvertime()
+const toggleFilters = async () => {
+  filterOpen.value = !filterOpen.value
+  if (!filterOpen.value) return
+  await nextTick()
+  const rect = filterButton.value?.getBoundingClientRect()
+  if (!rect) return
+  filterPanelStyle.value = {
+    top: `${rect.bottom + 8}px`,
+    left: `${Math.min(rect.left, window.innerWidth - 450)}px`,
+  }
+}
+const applyPopoverFilters = (filters) => {
+  range.value = filters.range
+  if (activeTab.value === 'commission') {
+    commissionType.value = filters.commissionType
+    commissionCache.clear()
+    applyCommission()
+  } else {
+    overtimeStatus.value = filters.overtimeStatus
+    overtimeCache.clear()
+    applyOvertime()
+  }
+  filterOpen.value = false
+}
 const formatIndonesianDate = (value) => {
   if (!value) return '-'
   const date = String(value).slice(0, 10).split('-')
@@ -273,15 +300,24 @@ onMounted(() => fetchCommission())
             @filter="applyCommission"
             @navigate="({ cursor }) => cursor && fetchCommission(false, cursor)"
             ><template #filters
-              ><DateRangePicker v-model="range" @update:model-value="applyCommission" /><select
-                v-model="commissionType"
-                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                @change="applyCommission"
-              >
-                <option value="">Semua skema</option>
-                <option value="percentage">% Omzet</option>
-                <option value="per_quantity">Nominal Qty</option>
-              </select></template
+              ><div class="relative inline-block">
+                <button
+                  ref="filterButton"
+                  type="button"
+                  class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-[#29476b] dark:bg-[#102542] dark:text-slate-200"
+                  @click="toggleFilters"
+                ><Filter :size="16" class="mr-2" />Filter</button>
+                <CommissionOvertimeFilters
+                  v-if="filterOpen"
+                  mode="commission"
+                  :range="range"
+                  :commission-type="commissionType"
+                  :panel-style="filterPanelStyle"
+                  :trigger-element="filterButton"
+                  @close="filterOpen = false"
+                  @apply="applyPopoverFilters"
+                />
+              </div></template
             ><template #cell-employee="{ item }"
               ><div class="font-semibold text-slate-900 dark:text-white">{{ item.name }}</div>
               <div class="text-xs text-slate-500">{{ item.nik }}</div></template
@@ -337,21 +373,31 @@ onMounted(() => fetchCommission())
             :pagination="overtime"
             :loading="overtimeLoading"
             :columns="overtimeColumns"
+            searchable
+            :search="search"
+            search-placeholder="Cari nama karyawan..."
+            @update:search="search = $event"
+            @filter="applyOvertime"
             @navigate="({ cursor }) => cursor && fetchOvertime(false, cursor)"
             ><template #filters
-              ><select
-                v-model="overtimeStatus"
-                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                @change="applyOvertime"
-              >
-                <option value="">Semua status</option>
-                <option value="pending">Pending</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option></select
-              ><DatePicker
-                v-model="range[0]"
-                aria-label="Tanggal mulai"
-                @update:model-value="applyOvertime" /></template
+              ><div class="relative inline-block">
+                <button
+                  ref="filterButton"
+                  type="button"
+                  class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-[#29476b] dark:bg-[#102542] dark:text-slate-200"
+                  @click="toggleFilters"
+                ><Filter :size="16" class="mr-2" />Filter</button>
+                <CommissionOvertimeFilters
+                  v-if="filterOpen"
+                  mode="overtime"
+                  :range="range"
+                  :overtime-status="overtimeStatus"
+                  :panel-style="filterPanelStyle"
+                  :trigger-element="filterButton"
+                  @close="filterOpen = false"
+                  @apply="applyPopoverFilters"
+                />
+              </div></template
             ><template #cell-date="{ item }">{{
               formatIndonesianDate(item.overtime_date)
             }}</template

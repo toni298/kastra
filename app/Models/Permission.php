@@ -12,8 +12,13 @@ class Permission extends SpatiePermission
 
     protected static function booted(): void
     {
-        static::saved(static fn () => Cache::forget('permission-options'));
-        static::deleted(static fn () => Cache::forget('permission-options'));
+        $invalidate = static function (): void {
+            Cache::forget('permission-options');
+            Cache::increment('inertia-auth-version:permissions');
+        };
+
+        static::saved($invalidate);
+        static::deleted($invalidate);
     }
 }
 

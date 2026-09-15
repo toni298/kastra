@@ -32,6 +32,7 @@ class Employee extends Model
       'qr_code_data',
       'face_recognition_hash',
       'hired_at',
+      'contract_ends_at',
    ];
 
    protected $hidden = ['pin', 'face_recognition_hash'];
@@ -43,6 +44,7 @@ class Employee extends Model
          'allowance' => 'integer',
          'commission_value' => 'decimal:2',
          'hired_at' => 'date',
+         'contract_ends_at' => 'date',
       ];
    }
 

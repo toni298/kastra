@@ -398,9 +398,7 @@ class RbacService
         // Invalidate snapshot permission Inertia seluruh user company agar
         // menu/sidebar langsung berubah pada request berikutnya (realtime),
         // tanpa menunggu cache 5 menit kedaluwarsa.
-        app(InertiaAuthorizationService::class)->forgetMany(
-            $company->users()->get(['id'])
-        );
+        app(InertiaAuthorizationService::class)->forgetCompany((string) $company->getKey());
     }
 
     /**

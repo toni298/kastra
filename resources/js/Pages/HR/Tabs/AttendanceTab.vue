@@ -1,16 +1,16 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import axios from 'axios'
-import { Clock3, ExternalLink, Pencil, Plus, UsersRound } from 'lucide-vue-next'
+import { Clock3, ExternalLink, Filter, Pencil, Plus, UsersRound } from 'lucide-vue-next'
 import Button from '@/Components/UI/Button.vue'
 import DataPanel from '@/Components/UI/DataPanel.vue'
 import DataTable from '@/Components/UI/DataTable.vue'
-import DatePicker from '@/Components/UI/DatePicker.vue'
 import Modal from '@/Components/UI/Modal.vue'
 import Spinner from '@/Components/UI/Spinner.vue'
 import { useToastify } from '@/Composables/useToastify'
 import ShiftTable from '../Components/ShiftTable.vue'
 import ShiftDetailDrawer from '../Components/ShiftDetailDrawer.vue'
+import AttendanceFilters from '../Components/AttendanceFilters.vue'
 
 defineProps({})
 const toast = useToastify()
@@ -43,6 +43,9 @@ const correctionForm = ref({
 const date = ref(new Date().toISOString().slice(0, 10))
 const status = ref('')
 const search = ref('')
+const filterOpen = ref(false)
+const filterButton = ref(null)
+const filterPanelStyle = ref({})
 const cards = computed(() => [
   {
     label: 'Hadir Tepat Waktu',
@@ -131,8 +134,28 @@ const switchSubTab = (tab) => {
   if (tab === 'shifts') fetchShifts()
 }
 const applyFilters = (filters = {}) => {
-  if (typeof filters === 'object' && filters.search !== undefined) search.value = filters.search
+  if (typeof filters === 'object') {
+    if (filters.date !== undefined) date.value = filters.date
+    if (filters.status !== undefined) status.value = filters.status
+    if (filters.search !== undefined) search.value = filters.search
+    filterOpen.value = false
+  }
   fetchAttendances()
+}
+const updateSearch = (value) => {
+  search.value = value
+  fetchAttendances()
+}
+const toggleFilters = async () => {
+  filterOpen.value = !filterOpen.value
+  if (!filterOpen.value) return
+  await nextTick()
+  const rect = filterButton.value?.getBoundingClientRect()
+  if (!rect) return
+  filterPanelStyle.value = {
+    top: `${rect.bottom + 8}px`,
+    left: `${Math.min(rect.left, window.innerWidth - 360)}px`,
+  }
 }
 const navigate = ({ cursor }) => cursor && fetchAttendances({ cursor })
 const openKiosk = () => window.open(route('kiosk.attendance'), '_blank', 'noopener')
@@ -281,27 +304,29 @@ onMounted(() => fetchAttendances())
             :search="search"
             search-placeholder="Cari nama atau NIK..."
             :columns="columns"
-            @update:search="search = $event"
-            @filter="applyFilters"
+            @update:search="updateSearch"
+            @filter="updateSearch"
             @navigate="navigate"
           >
             <template #filters>
-              <DatePicker
-                v-model="date"
-                aria-label="Tanggal absensi"
-                @update:model-value="applyFilters"
-              />
-              <select
-                v-model="status"
-                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
-                @change="applyFilters"
-              >
-                <option value="">Semua status</option>
-                <option value="present">Tepat waktu</option>
-                <option value="late">Terlambat</option>
-                <option value="absent">Alpa</option>
-                <option value="incomplete">Belum lengkap</option>
-              </select>
+              <div class="relative inline-block">
+                <button
+                  ref="filterButton"
+                  type="button"
+                  class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-[#29476b] dark:bg-[#102542] dark:text-slate-200 dark:hover:bg-[#163354]"
+                  @click="toggleFilters"
+                >
+                  <Filter :size="16" class="mr-2" />Filter
+                </button>
+                <AttendanceFilters
+                  v-if="filterOpen"
+                  :filters="{ date, status }"
+                  :panel-style="filterPanelStyle"
+                  :trigger-element="filterButton"
+                  @close="filterOpen = false"
+                  @apply="applyFilters"
+                />
+              </div>
             </template>
             <template #cell-employee="{ item }"
               ><div class="font-medium text-slate-900 dark:text-white">
@@ -360,7 +385,7 @@ onMounted(() => fetchAttendances())
       v-if="correction"
       :model-value="true"
       title="Koreksi Absensi"
-      description="Perubahan akan tercatat sebagai adjustment admin."
+      description="Perbarui waktu dan status kehadiran karyawan."
       size="lg"
       @update:model-value="correction = null"
     >

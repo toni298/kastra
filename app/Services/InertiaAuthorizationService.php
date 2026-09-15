@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
  */
 class InertiaAuthorizationService
 {
+    private const CACHE_TTL = 900;
+
     /** @var array<string, array{roles: list<string>, permissions: list<string>}> */
     private array $snapshots = [];
 
@@ -30,8 +32,18 @@ class InertiaAuthorizationService
 
     public function forget(User $user): void
     {
-        unset($this->snapshots[$user->getMorphClass() . ':' . $user->getKey()]);
-        Cache::forget('inertia-auth:' . $user->getMorphClass() . ':' . $user->getKey());
+        unset($this->snapshots[$this->snapshotIdentity($user)]);
+        Cache::increment($this->userVersionKey($user));
+    }
+
+    public function forgetCompany(string $companyId): void
+    {
+        Cache::increment($this->companyVersionKey($companyId));
+        foreach (array_keys($this->snapshots) as $identity) {
+            if (str_starts_with($identity, $companyId.':')) {
+                unset($this->snapshots[$identity]);
+            }
+        }
     }
 
     /**
@@ -52,15 +64,15 @@ class InertiaAuthorizationService
     /** @return array{roles: list<string>, permissions: list<string>} */
     public function for(User $user): array
     {
-        $snapshotKey = $user->getMorphClass() . ':' . $user->getKey();
+        $snapshotKey = $this->snapshotIdentity($user);
 
         if (isset($this->snapshots[$snapshotKey])) {
             return $this->snapshots[$snapshotKey];
         }
 
-        $cacheKey = 'inertia-auth:' . $user->getMorphClass() . ':' . $user->getKey();
+        $cacheKey = 'inertia-auth:'.(string) $user->company_id.':'.$this->companyVersion($user).':'.$this->permissionVersion().':'.$user->getKey().':'.$this->userVersion($user);
 
-        return $this->snapshots[$snapshotKey] = Cache::remember($cacheKey, 300, function () use ($user) {
+        return $this->snapshots[$snapshotKey] = Cache::remember($cacheKey, self::CACHE_TTL, function () use ($user) {
             $modelType = $user->getMorphClass();
             $rolesTable = config('permission.table_names.roles', 'roles');
             $permissionsTable = config('permission.table_names.permissions', 'permissions');
@@ -95,5 +107,35 @@ class InertiaAuthorizationService
                 'permissions' => $direct->merge($fromRoles)->map(static fn($name): string => (string) $name)->unique()->values()->all(),
             ];
         });
+    }
+
+    private function snapshotIdentity(User $user): string
+    {
+        return (string) $user->company_id.':'.$user->getMorphClass().':'.$user->getKey();
+    }
+
+    private function companyVersion(User $user): int
+    {
+        return (int) Cache::rememberForever($this->companyVersionKey((string) $user->company_id), static fn (): int => 1);
+    }
+
+    private function userVersion(User $user): int
+    {
+        return (int) Cache::rememberForever($this->userVersionKey($user), static fn (): int => 1);
+    }
+
+    private function permissionVersion(): int
+    {
+        return (int) Cache::rememberForever('inertia-auth-version:permissions', static fn (): int => 1);
+    }
+
+    private function companyVersionKey(string $companyId): string
+    {
+        return 'inertia-auth-version:company:'.$companyId;
+    }
+
+    private function userVersionKey(User $user): string
+    {
+        return 'inertia-auth-version:user:'.$user->getKey();
     }
 }

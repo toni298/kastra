@@ -45,11 +45,13 @@ class User extends Authenticatable
      */
     public function isCashierOnly(): bool
     {
-        if ($this->hasRole('owner')) {
+        $authorization = app(\App\Services\InertiaAuthorizationService::class)->for($this);
+
+        if (in_array('owner', $authorization['roles'], true)) {
             return false;
         }
 
-        return $this->can('cashier.access');
+        return in_array('cashier.access', $authorization['permissions'], true);
     }
 
     /**

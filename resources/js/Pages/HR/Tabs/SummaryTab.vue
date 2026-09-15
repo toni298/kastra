@@ -1,11 +1,14 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { UserCheck, UserRound, UsersRound, WalletCards } from 'lucide-vue-next'
 import { formatCurrency } from '@/Utils/helpers'
+import SummaryOperationalWidgets from '../Components/SummaryOperationalWidgets.vue'
 
 const props = defineProps({
   summary: { type: Object, default: () => ({}) },
 })
+const loading = ref(true)
+onMounted(() => { loading.value = false })
 const cards = computed(() => [
   {
     label: 'Total Karyawan',
@@ -35,11 +38,12 @@ const cards = computed(() => [
 </script>
 
 <template>
-  <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+  <div class="space-y-6">
+    <section class="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
     <article
       v-for="card in cards"
       :key="card.label"
-      class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-[#29476b] dark:bg-[#102542]"
+      class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-[#29476b] dark:bg-[#102542]"
     >
       <div class="flex items-start justify-between gap-3">
         <div>
@@ -51,5 +55,7 @@ const cards = computed(() => [
         /></span>
       </div>
     </article>
-  </section>
+    </section>
+    <SummaryOperationalWidgets :summary="props.summary" :loading="loading" />
+  </div>
 </template>

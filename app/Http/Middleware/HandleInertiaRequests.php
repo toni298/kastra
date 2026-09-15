@@ -43,24 +43,22 @@ class HandleInertiaRequests extends Middleware
         }
 
         $user = $request->user();
-        $authorization = $user
-            ? app(InertiaAuthorizationService::class)->for($user)
-            : ['roles' => [], 'permissions' => []];
-
-        $menus = $user
-            ? app(MenuService::class)->forUser($user, $authorization['permissions'])
-            : [];
-
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $user ? [
                     ...$user->only('id', 'name', 'email', 'company_id'),
                 ] : null,
-                'roles' => $authorization['roles'],
-                'permissions' => $authorization['permissions'],
+                'roles' => fn() => $user
+                    ? app(InertiaAuthorizationService::class)->for($user)['roles']
+                    : [],
+                'permissions' => fn() => $user
+                    ? app(InertiaAuthorizationService::class)->for($user)['permissions']
+                    : [],
             ],
-            'menus' => fn() => $menus,
+            'menus' => fn() => $user
+                ? app(MenuService::class)->forUser($user, app(InertiaAuthorizationService::class)->for($user)['permissions'])
+                : [],
             'salesTabs' => fn() => app(MenuService::class)->salesTabs(),
             'context' => [
                 'company' => fn() => $request->attributes
