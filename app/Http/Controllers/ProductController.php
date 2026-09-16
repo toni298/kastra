@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Product\IndexProductRequest;
+use App\Http\Requests\Product\ImportProductCommitChunkRequest;
+use App\Http\Requests\Product\ImportProductPreviewRequest;
 use App\Http\Requests\Product\StoreProductRequest;
 use App\Http\Requests\Product\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
@@ -10,7 +12,9 @@ use App\Models\Branch;
 use App\Models\Product;
 use App\Repositories\ProductRepository;
 use App\Services\CompanyContext;
+use App\Services\ProductImportService;
 use App\Services\ProductService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Inertia\Inertia;
@@ -21,6 +25,7 @@ class ProductController extends Controller
         private ProductRepository $repository,
         private ProductService $service,
         private CompanyContext $companyContext,
+        private ProductImportService $importService,
     ) {}
 
     public function index(IndexProductRequest $request)
@@ -87,6 +92,32 @@ class ProductController extends Controller
         $this->service->delete($product);
 
         return back()->with('success', 'Produk berhasil dihapus.');
+    }
+
+    public function importTemplate()
+    {
+        Gate::authorize('create', Product::class);
+
+        return $this->importService->downloadTemplate();
+    }
+
+    public function importPreview(ImportProductPreviewRequest $request): JsonResponse
+    {
+        Gate::authorize('create', Product::class);
+
+        return response()->json(
+            $this->importService->preview($this->companyId(), $request->file('file')),
+        );
+    }
+
+    public function importCommitChunk(ImportProductCommitChunkRequest $request): JsonResponse
+    {
+        Gate::authorize('create', Product::class);
+
+        return response()->json([
+            'success' => true,
+            'inserted' => $this->importService->commitChunk($this->companyId(), $request->validated('rows')),
+        ]);
     }
 
     private function companyId(): string

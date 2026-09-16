@@ -5,6 +5,7 @@ import PageHeader from '@/Components/UI/PageHeader.vue'
 import ProductDeleteModal from './ProductDeleteModal.vue'
 import ProductDetailDrawer from './ProductDetailDrawer.vue'
 import ProductFormModal from './ProductFormModal.vue'
+import ProductImportModal from './ProductImportModal.vue'
 import { useProductTabs } from '../Composables/useProductTabs'
 import BrandTab from '../Tabs/BrandTab.vue'
 import CategoryTab from '../Tabs/CategoryTab.vue'
@@ -87,6 +88,7 @@ const {
       @form="openProductForm"
       @detail="openProductModal('detail', $event)"
       @delete="openProductModal('delete', $event)"
+      @import="productModal = 'import'"
       @mutated="handleProductMutation"
     />
     <CategoryTab
@@ -128,6 +130,11 @@ const {
       :product="selectedProduct"
       @close="productModal = null"
       @deleted="handleProductMutation"
+    />
+    <ProductImportModal
+      v-if="productModal === 'import'"
+      @close="productModal = null"
+      @imported="handleProductMutation"
     />
     <ProductDetailDrawer
       v-if="productModal === 'detail'"

@@ -3,7 +3,7 @@ import { computed, ref, watch } from 'vue'
 import { router } from '@inertiajs/vue3'
 import ProductTabPanel from '../Components/ProductTabPanel.vue'
 
-defineEmits(['form', 'detail', 'delete', 'mutated'])
+defineEmits(['form', 'detail', 'delete', 'import', 'mutated'])
 
 const props = defineProps({
   items: { type: Object, default: null },
@@ -37,6 +37,7 @@ const requestProducts = ({ url, data = {}, replace = false }) => {
     @form="$emit('form', $event)"
     @detail="$emit('detail', $event)"
     @delete="$emit('delete', $event)"
+    @import="$emit('import')"
     @mutated="$emit('mutated')"
   />
 </template>

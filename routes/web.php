@@ -172,6 +172,9 @@ Route::middleware(['auth', 'verified', 'onboarded', 'company.context', 'cashier.
         ->only(['index', 'store'])
         ->middleware('can:number_generators.view');
     Route::get('products', [ProductController::class, 'index'])->middleware('can:products.view')->name('products.index');
+    Route::get('products/import-template', [ProductController::class, 'importTemplate'])->middleware('can:products.create')->name('products.import.template');
+    Route::post('products/import-preview', [ProductController::class, 'importPreview'])->middleware('can:products.create')->name('products.import.preview');
+    Route::post('products/import-commit-chunk', [ProductController::class, 'importCommitChunk'])->middleware('can:products.create')->name('products.import.commit');
     Route::post('products', [ProductController::class, 'store'])->middleware('can:products.create')->name('products.store');
     Route::put('products/{product}', [ProductController::class, 'update'])->middleware('can:products.edit')->name('products.update');
     Route::patch('products/{product}', [ProductController::class, 'update'])->middleware('can:products.edit')->name('products.update.patch');

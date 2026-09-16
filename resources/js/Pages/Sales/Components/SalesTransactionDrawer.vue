@@ -17,7 +17,9 @@ const props = defineProps({
 const emit = defineEmits(['close', 'payment', 'return', 'completed', 'finalize'])
 const { props: pageProps } = usePage()
 const completeConfirm = ref(false)
+const finalizeConfirm = ref(false)
 const processingComplete = ref(false)
+const processingFinalize = ref(false)
 const showInvoicePreview = ref(false)
 const invoiceUrl = ref('')
 const toast = useToastify()
@@ -206,7 +208,21 @@ const completeDelivery = async () => {
   processingComplete.value = true
 
   try {
-    await window.axios.post(route('sales.transactions.complete', transaction.value.id))
+    const csrfToken = document.head.querySelector('meta[name="csrf-token"]')?.content
+
+    await window.axios.post(
+      route('sales.transactions.complete', transaction.value.id),
+      {},
+      {
+        withCredentials: true,
+        headers: {
+          'X-CSRF-TOKEN': csrfToken || '',
+          'X-Requested-With': 'XMLHttpRequest',
+          Accept: 'application/json',
+        },
+      }
+    )
+
     toast.success('Transaksi pengiriman berhasil diselesaikan.')
     completeConfirm.value = false
     emit('completed')
@@ -219,6 +235,40 @@ const completeDelivery = async () => {
     processingComplete.value = false
   }
 }
+
+const finalizeTransaction = async () => {
+  if (processingFinalize.value) return
+  processingFinalize.value = true
+
+  try {
+    const csrfToken = document.head.querySelector('meta[name="csrf-token"]')?.content
+
+    await window.axios.post(
+      route('sales.transactions.finalize', transaction.value.id),
+      {},
+      {
+        withCredentials: true,
+        headers: {
+          'X-CSRF-TOKEN': csrfToken || '',
+          'X-Requested-With': 'XMLHttpRequest',
+          Accept: 'application/json',
+        },
+      }
+    )
+
+    toast.success('Transaksi berhasil difinalisasi.')
+    finalizeConfirm.value = false
+    emit('completed')
+  } catch (error) {
+    toast.error(
+      error?.response?.data?.message ??
+        'Transaksi gagal difinalisasi. Silakan coba lagi.'
+    )
+  } finally {
+    processingFinalize.value = false
+  }
+}
+
 const transactionBadge = (value) =>
   value === 'Completed'
     ? 'info'
@@ -361,7 +411,7 @@ const paymentBadge = (value) =>
             v-if="canFinalize"
             type="button"
             class="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-700"
-            @click="emit('finalize', transaction)"
+            @click="finalizeConfirm = true"
           >
             <CheckCircle2 :size="16" />Selesaikan Transaksi
           </button>
@@ -610,6 +660,37 @@ const paymentBadge = (value) =>
             @click="completeDelivery"
           >
             <CheckCircle2 :size="16" />Ya, Selesaikan
+          </button>
+        </template>
+      </Modal>
+
+      <Modal
+        :model-value="finalizeConfirm"
+        title="Selesaikan Transaksi"
+        description="Konfirmasi finalisasi transaksi ini. Tindakan ini akan mengisi tanggal dan user yang menyelesaikan."
+        size="md"
+        @update:model-value="finalizeConfirm = $event"
+      >
+        <p class="text-sm text-slate-600 dark:text-slate-300">
+          Transaksi <strong>{{ transaction.number }}</strong> akan difinalisasi. Sistem akan mencatat
+          <strong>finalized_at</strong> dan <strong>finalized_by</strong> berdasarkan user yang
+          mengonfirmasi.
+        </p>
+        <template #footer>
+          <button
+            type="button"
+            class="inline-flex h-10 items-center justify-center rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-[#29476b] dark:bg-[#102542] dark:text-slate-200 dark:hover:bg-[#163354]"
+            @click="finalizeConfirm = false"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            class="inline-flex h-10 items-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+            :disabled="processingFinalize"
+            @click="finalizeTransaction"
+          >
+            <CheckCircle2 :size="16" />Ya, Finalisasi
           </button>
         </template>
       </Modal>

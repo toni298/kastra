@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-vue-next'
 
 const props = defineProps({
   title: { type: String, required: true },
-  icon: { type: Object, default: null },
+  icon: { type: [Object, Function], default: null },
   defaultOpen: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
 })

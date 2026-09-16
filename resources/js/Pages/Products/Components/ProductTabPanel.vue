@@ -1,5 +1,5 @@
 <script setup>
-import { Plus } from '@lucide/vue'
+import { FileSpreadsheet, Plus } from '@lucide/vue'
 import { computed } from 'vue'
 import Button from '@/Components/UI/Button.vue'
 import DataPanel from '@/Components/UI/DataPanel.vue'
@@ -17,7 +17,7 @@ const props = defineProps({
   routeName: { type: String, default: 'products.index' },
 })
 
-const emit = defineEmits(['request', 'form', 'detail', 'delete', 'mutated'])
+const emit = defineEmits(['request', 'form', 'detail', 'delete', 'import', 'mutated'])
 
 const { can } = useAuthorization()
 const canCreate = computed(() => props.canCreate || can('products.create'))
@@ -42,9 +42,14 @@ const { search, sortKey, sortDirection, applyFilters, handleSearch, navigate, ha
         <h2 class="text-lg font-semibold text-slate-950 dark:text-white">Daftar Produk</h2>
         <p class="mt-1 text-sm text-slate-500">Kelola produk yang tersedia untuk operasional.</p>
       </div>
-      <Button v-if="canCreate" size="sm" @click="emit('form')">
-        <Plus :size="17" class="mr-2" />Tambah Produk
-      </Button>
+      <div v-if="canCreate" class="flex flex-wrap items-center gap-2">
+        <Button variant="secondary" size="sm" @click="emit('import')">
+          <FileSpreadsheet :size="17" class="mr-2" />Import Excel
+        </Button>
+        <Button size="sm" @click="emit('form')">
+          <Plus :size="17" class="mr-2" />Tambah Produk
+        </Button>
+      </div>
     </div>
 
     <DataPanel>
@@ -63,6 +68,7 @@ const { search, sortKey, sortDirection, applyFilters, handleSearch, navigate, ha
         @detail="emit('detail', $event)"
         @edit="emit('form', $event)"
         @delete="emit('delete', $event)"
+        @import="emit('import')"
       />
     </DataPanel>
   </div>

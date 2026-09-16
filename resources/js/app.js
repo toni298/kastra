@@ -11,6 +11,7 @@ import axios from 'axios'
 
 // Konfigurasi Axios Global
 window.axios = axios
+window.axios.defaults.withCredentials = true
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest'
 window.axios.defaults.headers.common['Accept'] = 'application/json'
 
@@ -27,10 +28,7 @@ createInertiaApp({
   title: (title) => `${title} - ${appName}`,
 
   resolve: (name) =>
-    resolvePageComponent(
-      `./Pages/${name}.vue`,
-      import.meta.glob('./Pages/**/*.vue'),
-    ),
+    resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
 
   setup({ el, App, props, plugin }) {
     return createApp({ render: () => h(App, props) })

@@ -81,9 +81,7 @@ const submit = () => {
   }
 
   if (editing) {
-    form
-      .transform((data) => ({ ...data, _method: 'put' }))
-      .post(route('products.update', props.product.id), options)
+    form.put(route('products.update', props.product.id), options)
     return
   }
 
