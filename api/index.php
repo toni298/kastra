@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 $serverlessDefaults = [
     'APP_DEBUG' => 'false',
     'SESSION_DRIVER' => 'cookie',
+    'SESSION_SECURE_COOKIE' => 'true',
+    'SESSION_SAME_SITE' => 'lax',
     'CACHE_STORE' => 'array',
     'DEBUGBAR_ENABLED' => 'false',
     'DEBUGBAR_STORAGE_ENABLED' => 'false',
@@ -18,8 +20,11 @@ foreach ($serverlessDefaults as $key => $value) {
     $mustReplaceFilesystemState = $isVercel
         && in_array($key, ['SESSION_DRIVER', 'CACHE_STORE'], true)
         && $currentValue === 'file';
+    $mustUseHttpsCookie = $isVercel
+        && $key === 'SESSION_SECURE_COOKIE'
+        && $currentValue !== 'true';
 
-    if ($currentValue === false || $mustReplaceFilesystemState) {
+    if ($currentValue === false || $mustReplaceFilesystemState || $mustUseHttpsCookie) {
         putenv("{$key}={$value}");
         $_ENV[$key] = $value;
         $_SERVER[$key] = $value;
